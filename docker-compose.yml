@@ -14,14 +14,14 @@ services:
       XDEBUG_CLIENT_PORT: 9003
       PHP_IDE_CONFIG: serverName=Docker
     networks:
-      - sive_network
+      - faccob_network
     volumes:
       - ./:/appdata/www
       - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
 
   # NGINX
-  sive-web:
-    container_name: sive-web
+  faccob-web:
+    container_name: faccob-web
     build:
       target: dev
       context: .
@@ -33,40 +33,40 @@ services:
     links:
       - node-fac-cob
     networks:
-      - sive_network
+      - faccob_network
     depends_on:
       - node-fac-cob
 
   mailer:
-    container_name: sive-mailer
+    container_name: faccob-mailer
     image: schickling/mailcatcher
     ports:
       - '1081:1080'
       - '1026:1025'
     networks:
-      - sive_network
+      - faccob_network
 
   db:
-    container_name: sive-postgres
+    container_name: faccob-postgres
     build:
       context: .
       dockerfile: docker/postgresql/Dockerfile
     ports:
       - '5439:5432'
     environment:
-      POSTGRES_USER: sive
+      POSTGRES_USER: faccob
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: sive
+      POSTGRES_DB: faccob
       TZ: 'America/La_Paz'
       PGTZ: 'America/La_Paz'
     volumes:
-      - sive-pgsql-data:/var/lib/postgresql/data
+      - faccob-pgsql-data:/var/lib/postgresql/data
     networks:
-      - sive_network
+      - faccob_network
 
 networks:
-  sive_network:
+  faccob_network:
 
 volumes:
-  sive-pgsql-data:
+  faccob-pgsql-data:
 
