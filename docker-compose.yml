@@ -1,0 +1,72 @@
+services:
+
+  # PHP
+  node-fac-cob:
+    container_name: node-fac-cob
+    build:
+      target: dev
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        userid: $userid
+    environment:
+      XDEBUG_CLIENT_HOST: 172.17.0.1
+      XDEBUG_CLIENT_PORT: 9003
+      PHP_IDE_CONFIG: serverName=Docker
+    networks:
+      - sive_network
+    volumes:
+      - ./:/appdata/www
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+
+  # NGINX
+  sive-web:
+    container_name: sive-web
+    build:
+      target: dev
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    ports:
+      - '8008:80'
+    volumes:
+      - ./:/appdata/www
+    links:
+      - node-fac-cob
+    networks:
+      - sive_network
+    depends_on:
+      - node-fac-cob
+
+  mailer:
+    container_name: sive-mailer
+    image: schickling/mailcatcher
+    ports:
+      - '1081:1080'
+      - '1026:1025'
+    networks:
+      - sive_network
+
+  db:
+    container_name: sive-postgres
+    build:
+      context: .
+      dockerfile: docker/postgresql/Dockerfile
+    ports:
+      - '5439:5432'
+    environment:
+      POSTGRES_USER: sive
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: sive
+      TZ: 'America/La_Paz'
+      PGTZ: 'America/La_Paz'
+    volumes:
+      - sive-pgsql-data:/var/lib/postgresql/data
+    networks:
+      - sive_network
+
+networks:
+  sive_network:
+
+volumes:
+  sive-pgsql-data:
+
