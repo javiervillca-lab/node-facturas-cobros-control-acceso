@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nuevo cliente{% endblock %}
+
+{% block body %}
+    <h1>Nuevo cliente</h1>
+    <form class="form-card" method="post" action="{{ path('cliente_new') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+
+        <label for="nombre">Nombre</label>
+        <input id="nombre" name="nombre" required>
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required>
+
+        <label for="plan">Plan</label>
+        <select id="plan" name="plan">
+            <option value="pase_dia">Pase por dia</option>
+            <option value="mensual_flexible" selected>Mensual flexible</option>
+            <option value="escritorio_dedicado">Escritorio dedicado</option>
+            <option value="plan_equipo">Plan de equipo</option>
+        </select>
+
+        <button class="boton" type="submit">Guardar</button>
+    </form>
+{% endblock %}

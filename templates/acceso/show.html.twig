@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Acceso de {{ acceso.miembro.nombre }}{% endblock %}
+
+{% block body %}
+    <h1>{{ acceso.miembro.nombre }} <span class="badge badge-{{ acceso.estado }}">{{ acceso.estado }}</span></h1>
+
+    <div class="detalle">
+        <dl>
+            <dt>Observacion</dt><dd>{{ acceso.observacion }}</dd>
+            <dt>Plan</dt><dd>{{ acceso.miembro.plan }}</dd>
+        </dl>
+    </div>
+
+    <h3>Historial de operaciones</h3>
+    <table>
+        <thead>
+            <tr><th>Tipo</th><th>Estado</th><th>Motivo</th><th>Creada</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for operacion in acceso.operaciones %}
+                <tr>
+                    <td>{{ operacion.tipo }}</td>
+                    <td>{{ operacion.estado }}</td>
+                    <td>{{ operacion.motivo ?: '-' }}</td>
+                    <td>{{ operacion.creadaEn|date('d/m/Y H:i') }}</td>
+                    <td>
+                        {% if operacion.estado == 'solicitada' and operacion.tipo == 'retiro_impago' %}
+                            <form class="inline" method="post" action="{{ path('acceso_confirmar_suspension', { id: acceso.id, operacionId: operacion.id }) }}">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                                <button class="boton secundario" type="submit">Confirmar retiro de huella</button>
+                            </form>
+                        {% elseif operacion.estado == 'solicitada' and operacion.tipo == 'alta' %}
+                            <form class="inline" method="post" action="{{ path('acceso_confirmar_restablecimiento', { id: acceso.id, operacionId: operacion.id }) }}">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                                <button class="boton secundario" type="submit">Confirmar alta de huella</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5">sin operaciones registradas</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="cards">
+        {% if acceso.estado == 'habilitado' %}
+            <form method="post" action="{{ path('acceso_suspender', { id: acceso.id }) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                <button class="boton peligro" type="submit">Evaluar y solicitar suspension</button>
+            </form>
+        {% endif %}
+
+        {% if acceso.estado == 'suspendido' %}
+            <form method="post" action="{{ path('acceso_restablecer', { id: acceso.id }) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                <input type="hidden" name="autorizadoPor" value="Recepcion">
+                <button class="boton" type="submit">Evaluar y solicitar restablecimiento</button>
+            </form>
+        {% endif %}
+
+        <form method="post" action="{{ path('acceso_evaluar_ingreso', { id: acceso.id }) }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+            <button class="boton secundario" type="submit">Simular ingreso ahora</button>
+        </form>
+    </div>
+{% endblock %}

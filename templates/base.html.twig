@@ -19,6 +19,22 @@
         {% endif %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <header class="topbar">
+            <a class="brand" href="{{ path('home') }}">Nodo</a>
+            <nav>
+                <a href="{{ path('cliente_index') }}">Clientes</a>
+                <a href="{{ path('cuenta_index') }}">Cuentas</a>
+                <a href="{{ path('factura_index') }}">Facturas</a>
+                <a href="{{ path('acceso_index') }}">Accesos</a>
+            </nav>
+        </header>
+        <main class="container">
+            {% for tipo, mensajes in app.flashes %}
+                {% for mensaje in mensajes %}
+                    <div class="flash flash-{{ tipo }}">{{ mensaje }}</div>
+                {% endfor %}
+            {% endfor %}
+            {% block body %}{% endblock %}
+        </main>
     </body>
 </html>

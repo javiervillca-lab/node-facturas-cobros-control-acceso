@@ -1,3 +1,206 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
-    background-color: skyblue;
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: #f4f6f8;
+    color: #1c2733;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.9rem 1.5rem;
+    background: #1c2733;
+    color: #fff;
+}
+
+.topbar .brand {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #fff;
+    text-decoration: none;
+}
+
+.topbar nav a {
+    color: #cdd6e0;
+    text-decoration: none;
+    margin-right: 1.2rem;
+    font-size: 0.95rem;
+}
+
+.topbar nav a:hover {
+    color: #fff;
+}
+
+.container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.flash {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.flash-success {
+    background: #e3f3e8;
+    color: #1f6b3a;
+    border: 1px solid #b9e0c4;
+}
+
+.flash-error {
+    background: #fbe8e8;
+    color: #a3312f;
+    border: 1px solid #f1bcbb;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.card .numero {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.card .etiqueta {
+    font-size: 0.8rem;
+    color: #5a6673;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+th, td {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #edf0f3;
+    font-size: 0.9rem;
+}
+
+th {
+    background: #f0f2f5;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #5a6673;
+}
+
+tr:hover td {
+    background: #fafbfc;
+}
+
+a.boton, button.boton {
+    display: inline-block;
+    background: #1c2733;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button.boton.secundario {
+    background: #5a6673;
+}
+
+button.boton.peligro {
+    background: #a3312f;
+}
+
+form.inline {
+    display: inline;
+}
+
+.form-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    max-width: 640px;
+}
+
+.form-card label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+    color: #5a6673;
+}
+
+.form-card input, .form-card select {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 0.9rem;
+    border: 1px solid #d7dde3;
+    border-radius: 5px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-pendiente { background: #fde9cf; color: #9a5b10; }
+.badge-saldada, .badge-emitida, .badge-habilitado { background: #d9f0e1; color: #1f6b3a; }
+.badge-enviada { background: #d6e8fb; color: #1d5a9e; }
+.badge-suspendido, .badge-suspension_pendiente { background: #fbe0df; color: #a3312f; }
+.badge-restablecimiento_pendiente, .badge-pendiente_de_emision { background: #e6e1f5; color: #5a3fa0; }
+
+.fila-concepto {
+    display: grid;
+    grid-template-columns: 1.4fr 2fr 0.8fr 0.8fr 0.8fr;
+    gap: 0.5rem;
+    align-items: end;
+    margin-bottom: 0.6rem;
+}
+
+.detalle {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.detalle dl {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    row-gap: 0.4rem;
+}
+
+.detalle dt {
+    color: #5a6673;
+    font-size: 0.85rem;
 }
