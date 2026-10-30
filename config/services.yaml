@@ -21,3 +21,7 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\cobros\domain\CuentaPorCobrarRepositoryInterface: '@App\cobros\infrastructure\CuentaPorCobrarRepository'
+    App\facturacion\domain\FacturaRepositoryInterface: '@App\facturacion\infrastructure\FacturaRepository'
+    App\control_acceso\domain\AccesoMiembroRepositoryInterface: '@App\control_acceso\infrastructure\AccesoMiembroRepository'
+    App\control_acceso\domain\SituacionFinancieraPortInterface: '@App\control_acceso\infrastructure\SituacionFinancieraAdapter'
