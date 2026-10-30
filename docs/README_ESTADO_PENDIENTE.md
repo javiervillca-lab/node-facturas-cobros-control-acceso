@@ -1,9 +1,25 @@
-# Especificación técnica del modelo
+# Estado del proyecto y documentación activa
 
-Esta carpeta contiene la estructura de interfaces, persistencia y coordinación externa de la solución. El alcance comprende los módulos de Facturación y Cobros y Control de Acceso y sus tres raíces de consistencia. Las interfaces describen cómo separar consultas confiables, decisiones de dominio y actuaciones externas. El contenido es documental y no acredita una conexión bancaria, fiscal o física instalada.
+El entregable principal del proyecto se encuentra en [00_ENTREGABLE_COMPLETO.md](./00_ENTREGABLE_COMPLETO.md). A partir de ese documento, el repositorio define el contexto general del negocio, la arquitectura modular, la delimitación de contextos y el estado de avance del desarrollo.
 
-- [Interfaces, persistencia y coordinación](ESPECIFICACION_FUTURA_PROTOTIPO_Y_PRUEBAS.md).
-- [Modelo completo](../00_ENTREGABLE_COMPLETO.md).
-- [Contratos de integración](../01_Documento_Principal/06_Patrones_y_Contratos_de_Integracion.md).
+## Estado actual
 
-CuentaPorCobrar protege cargos, aplicaciones y excesos. Factura protege el documento cobrado y su resultado de emisión y envío. AccesoMiembro protege el permiso y la operación de huella. Los parámetros del proveedor y del dispositivo se configuran mediante adaptadores que conservan las identidades, versiones y evidencias descritas.
+El proyecto está en una fase inicial de definición arquitectónica y de dominio. La estructura base del monolito ya está creada, los contextos principales han sido identificados y la documentación del negocio está suficientemente consolidada para continuar con la implementación técnica.
+
+## Documentación relevante
+
+- [00_ENTREGABLE_COMPLETO.md](./00_ENTREGABLE_COMPLETO.md): visión general del proyecto y entregable principal.
+- [01-subdominios.md](./01-subdominios.md): división del negocio en subdominios.
+- [02-glosario.md](./02-glosario.md): vocabulario básico y lenguaje ubicuo.
+- [03-eventstorming.md](./03-eventstorming.md): eventos, comandos y actores.
+- [04-domain-stories.md](./04-domain-stories.md): historias de negocio.
+- [05-context-map.md](./05-context-map.md): fronteras entre contextos.
+- [06-reglas-invariantes.md](./06-reglas-invariantes.md): reglas e invariantes.
+- [ESPECIFICACION_FUTURA_PROTOTIPO_Y_PRUEBAS.md](./ESPECIFICACION_FUTURA_PROTOTIPO_Y_PRUEBAS.md): visión técnica futura para interfaces y persistencia.
+
+## Objetivo de la etapa actual
+
+- mantener la separación de responsabilidades por contexto,
+- continuar con la definición de agregados, entidades y value objects,
+- preparar los repositorios y puertos de infraestructura,
+- establecer contratos de integración entre facturación, cobros y control de acceso.
