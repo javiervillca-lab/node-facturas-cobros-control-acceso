@@ -1,35 +1,42 @@
-# 02. Glosario
+# 02. Glosario y lenguaje ubicuo
 
-## Términos del negocio
+Los términos se interpretan dentro de uno de los dos contextos delimitados en el modelo de Nodo. Si una palabra cambia de significado entre contextos, se debe explicitar el contexto o usar el término del contrato publicado.
 
-### Coworking
-Espacio de trabajo compartido donde los usuarios acceden por membresía, día o reserva.
+## Facturación y Cobros — *Generic*
 
-### Evento
-Actividad programada que puede requerir acceso especial, reserva o cobro adicional.
+| Término | Significado acordado |
+|---|---|
+| CuentaPorCobrar | Obligación económica que reúne conceptos de un pagador, moneda y período o tramo, con saldo y vencimiento propios |
+| ConceptoCobro | Servicio o importe valorizado incorporado a una cuenta, con origen y precio comprometido identificables |
+| AplicacionPago | Registro trazable de un movimiento verificado, con importe recibido, aplicado y posible exceso |
+| PagoInformado | Comunicación de un pago por un cliente o tercero; no equivale a verificación ni aplicación |
+| Exceso | Parte verificada del movimiento que supera el saldo pendiente; se conserva y puede tramitarse como devolución |
+| Saldada | Estado de `CuentaPorCobrar` cuyo saldo pendiente es cero |
+| Factura | Documento que refleja los conceptos efectivamente cobrados; tiene ciclo de vida separado del saldo de la cuenta |
+| PendienteDeEmision / Emitida / Enviada | Estados documentales de Factura; no expresan el estado de pago de la cuenta |
+| Pagador | Persona o entidad responsable de satisfacer la obligación; puede ser distinta del beneficiario del servicio |
 
-### Factura
-Documento emitido para una membresía, reserva, evento o servicio adicional.
+## Control de Acceso — *Generic*
 
-### Cobro
-Operación por la cual se recibe el pago asociado a una factura o evento.
+| Término | Significado acordado |
+|---|---|
+| AccesoMiembro | Agregado que conserva la habilitación y situación de acceso de un miembro |
+| Derecho de acceso | Permiso recibido de la fuente autorizada, con sujeto, alcance, vigencia y restricciones |
+| SituacionPago | Información financiera traducida al lenguaje de acceso mediante un contrato; no es una entidad financiera |
+| EvaluacionAcceso | Decisión de acceso evaluada para una acción y un instante determinados |
+| OperacionRegistroHuella | Operación identificable para dar de baja o volver a registrar una huella; solicitud y resultado confirmado son hechos distintos |
 
-### Cliente
-Persona o empresa que accede al servicio, alquila espacio o participa en eventos.
+## Términos de otros subdominios
 
-### Membresía
-Contrato o plan de acceso al coworking con condiciones y vigencia definidas.
-
-### Reserva
-Asignación de espacio, sala o servicio para un usuario o evento.
-
-### Acceso
-Permiso del usuario para ingresar al espacio o evento según su membresía o reserva.
-
-### Pago pendiente
-Monto aún no liquidado asociado a una factura o servicio del negocio.
+- **Membresía y plan**: paquete, cuota, beneficiarios, derechos y vigencia; su definición pertenece al subdominio de membresías.
+- **Reserva**: asignación de espacio, sala o servicio para un sujeto o evento; su disponibilidad no la decide el contexto financiero.
+- **Evento**: actividad programada que puede originar cargos y derechos temporales.
+- **Notificación**: intento de entrega de un mensaje; no es el hecho de dominio que origina el aviso.
+- **Cliente**, **pagador** y **miembro** no son sinónimos: nombrar el rol que interviene en cada operación.
 
 ## Reglas de uso
 
-- Usar siempre el mismo término en código, documentación y conversaciones.
-- Diferenciar claramente entre `membresía`, `reserva`, `evento` y `acceso` para evitar ambigüedad.
+- Usar los nombres del contexto correspondiente en documentación, contratos y código.
+- No llamar “Factura” a una obligación ni “pagada” a una cuenta sin describir la operación financiera que ocurrió.
+- Distinguir pago informado, movimiento verificado, pago aplicado y exceso.
+- No equiparar el estado financiero con una autorización o una actuación física de acceso.

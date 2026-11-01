@@ -2,7 +2,7 @@
 
 ## 1. Arquitectura de aplicación
 
-La solución se organiza como un monolito modular con Facturación y Cobros y Control de Acceso. Cada módulo separa dominio, aplicación, puertos y adaptadores. Las raíces se cargan y guardan mediante interfaces que pertenecen al modelo y no a un proveedor de base de datos. El dominio no conoce HTTP, credenciales externas ni el protocolo del lector de huella.
+La arquitectura objetivo organiza el monolito modular en dos *Bounded Contexts*, ambos *Generic*: Facturación y Cobros y Control de Acceso. Cada contexto separa dominio, aplicación, puertos y adaptadores. Las raíces se cargan y guardan mediante interfaces que pertenecen al modelo y no a un proveedor de base de datos. El dominio no conoce HTTP, credenciales externas ni el protocolo del lector de huella. Los directorios actuales `src/facturacion/` y `src/cobros/` son módulos internos del primer contexto, no fronteras de contexto adicionales.
 
 ```text
 nodo/

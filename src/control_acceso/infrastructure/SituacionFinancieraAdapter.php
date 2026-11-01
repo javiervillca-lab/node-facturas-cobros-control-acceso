@@ -7,8 +7,8 @@ use App\control_acceso\domain\SituacionFinancieraPortInterface;
 use App\Entity\Cliente;
 
 /**
- * Anti-Corruption Layer: traduce la consulta publica de Cobros al unico
- * valor que Control de Acceso necesita, sin tocar sus entidades internas.
+ * ACL del lado de Control de Acceso para traducir una consulta financiera al
+ * valor que este contexto necesita, sin compartir entidades de dominio.
  */
 class SituacionFinancieraAdapter implements SituacionFinancieraPortInterface
 {

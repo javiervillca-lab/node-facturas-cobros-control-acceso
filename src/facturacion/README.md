@@ -1,50 +1,24 @@
-# Contexto: Facturación
+# Módulo interno: Facturación
 
-## Propósito
+Este directorio contiene responsabilidades de facturación dentro del Bounded Context **Facturación y Cobros**, clasificado como *Generic*. No es un contexto delimitado independiente de `src/cobros/`.
 
-Este contexto transforma los servicios contratados en obligaciones económicas consistentes, verificables y facturables. Su responsabilidad principal es la emisión, mantenimiento y validación del ciclo de vida de la factura.
+## Responsabilidad
 
-## Responsabilidades
+Representar el documento que refleja los conceptos efectivamente cobrados, preparar y seguir su emisión, y conservar su relación con la cuenta y el servicio de origen. La factura mantiene un ciclo de vida documental propio: su estado no sustituye ni duplica el saldo y el estado de `CuentaPorCobrar`.
 
-- gestionar clientes, conceptos de cargo y cuentas por cobrar asociadas,
-- validar datos del cliente, del servicio contratado y de los importes,
-- calcular descuentos, recargos, impuestos y totales,
-- crear y mantener estados de la factura,
-- preparar la factura para su emisión y entrega,
-- conservar la relación entre el servicio contratado y la obligación económica generada.
+## Lenguaje del contexto
 
-## Conceptos clave
+`Factura`, `LineaFactura`, `TipoDocumento`, `PendienteDeEmision`, `Emitida` y `Enviada` describen el documento. `CuentaPorCobrar`, `AplicacionPago` y `Saldada` describen la obligación y el cobro dentro del mismo contexto financiero; no deben interpretarse como términos de un contexto separado.
 
-- Cliente
-- Cuenta o obligación
-- Concepto de cargo
-- Línea de factura
-- Factura
-- Estado de factura
-- Descuento y recargo
+## Límite e integración
 
-## Invariantes principales
+La raíz `Factura` conserva sus propias invariantes y se relaciona con `CuentaPorCobrar` mediante identidad y datos explícitos, sin convertir ambas raíces en una sola entidad. La emisión fiscal es un efecto externo y su resultado debe confirmarse antes de declarar la factura como emitida.
 
-- el total de la factura debe coincidir con la suma de los conceptos facturados,
-- una factura no puede quedar simultáneamente pagada y vencida por el mismo concepto,
-- los importes comprometidos no deben modificarse retroactivamente por cambios de tarifa,
-- la factura debe conservar la identidad del servicio o contrato que la originó.
+## Estructura
 
-## Eventos de dominio sugeridos
+- `domain/`: agregados, valores y políticas de acceso.
+- `application/`: evaluación y coordinación de operaciones.
+- `infrastructure/`: persistencia, ACL y adaptadores de dispositivos.
+- `interfaces/`: entradas administrativas y APIs.
 
-- `FacturaGenerada`
-- `FacturaEmitida`
-- `FacturaVencida`
-- `FacturaAnulada`
-- `ConceptoFacturado`
-
-## Capas sugeridas
-
-- `domain/`: entidades, value objects, agregados y reglas del dominio.
-- `application/`: servicios de liquidación, validación y preparación de emisión.
-- `infrastructure/`: persistencia, adaptadores fiscales y servicios externos.
-- `interfaces/`: APIs, controladores y event listeners.
-
-## Estado actual
-
-El contexto está definido como base arquitectónica y de dominio, con responsabilidades y reglas claras. La implementación concreta de agregados y casos de uso queda pendiente para la siguiente fase de desarrollo.
+Las reglas, estados y relaciones del dominio se describen en la documentación del proyecto.

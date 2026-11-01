@@ -1,52 +1,28 @@
-# Contexto: Control de acceso
+# Bounded Context: Control de Acceso — *Generic*
 
 ## Propósito
 
-Este contexto valora si una persona o entidad puede entrar a un espacio, participar en un evento o utilizar un servicio bajo condiciones determinadas. Debe conservar la separación entre autorización, evidencia y resultados operativos.
+Este contexto evalúa el derecho de una persona a ingresar a un espacio, participar en un evento o utilizar un servicio bajo condiciones determinadas. Protege la autorización y la coordinación de operaciones físicas, sin confundir una decisión lógica con el resultado sobre el registro de huella.
 
 ## Responsabilidades
 
-- validar membresías, reservas, pases y vigencias,
-- autorizar o denegar el ingreso según el estado del cliente y la política del acceso,
-- registrar entradas, salidas y eventos relevantes de auditoría,
-- coordinar con el negocio de facturación y cobros cuando el acceso dependa de cuota, pago o condiciones comerciales,
-- gestionar operaciones de huella y reactivación de permisos cuando corresponda.
+- evaluar derechos, membresías, reservas, pases, vigencias y restricciones,
+- decidir el ingreso según las reglas de acceso y la situación relevante,
+- conservar decisiones, motivos, resultados y evidencia para auditoría,
+- coordinar suspensiones, rehabilitaciones y operaciones sobre la huella,
+- consultar la situación económica a través del puerto financiero y traducirla a su propio lenguaje.
 
-## Conceptos clave
+## Lenguaje del contexto
 
-- usuario o miembro,
-- permiso,
-- pase,
-- reserva,
-- autorización,
-- registro de acceso,
-- operación de huella,
-- suspensión o restauración del acceso.
+`AccesoMiembro`, `SituacionPago`, `EvaluacionAcceso` y `OperacionRegistroHuella` pertenecen a este contexto. Los datos financieros llegan mediante el contrato público de Facturación y Cobros; este contexto no consulta sus repositorios ni modifica sus agregados.
 
-## Invariantes principales
+Una operación solicitada o adquirida no acredita que el efecto físico haya ocurrido. Los resultados confirmados e inciertos deben conservarse y recuperarse explícitamente.
 
-- un acceso solo se autoriza si existe una base válida de permisos o reserva,
-- la vigencia del pase debe validarse al momento de la autorización,
-- la operación de huella debe distinguir entre solicitud y confirmación,
-- las denegaciones y resultados inciertos deben conservarse como evidencia para auditoría.
+## Estructura
 
-## Eventos de dominio sugeridos
+- `domain/`: agregados, valores y políticas de acceso.
+- `application/`: evaluación y coordinación de operaciones.
+- `infrastructure/`: persistencia, ACL y adaptadores de dispositivos.
+- `interfaces/`: entradas administrativas y APIs.
 
-- `ReservaConfirmada`
-- `AccesoAutorizado`
-- `AccesoDenegado`
-- `MiembroHabilitado`
-- `MiembroSuspendido`
-- `RegistroHuellaSolicitado`
-- `RegistroHuellaConfirmado`
-
-## Capas sugeridas
-
-- `domain/`: entidades, agregados y políticas de acceso.
-- `application/`: validación de permisos, autorización y coordinación de eventos.
-- `infrastructure/`: integraciones con dispositivos, persistencia y adaptadores de acceso.
-- `interfaces/`: APIs, listeners y endpoints de gestión de eventos de acceso.
-
-## Estado actual
-
-El contexto está definido como una frontera separada con reglas de autorización y evidencia bien diferenciadas del dominio financiero. La implementación específica de permisos y operación de huella es una etapa posterior.
+Las reglas, estados y relaciones del dominio se describen en la documentación del proyecto. El diseño objetivo no implica que todos los flujos o adaptadores estén implementados.

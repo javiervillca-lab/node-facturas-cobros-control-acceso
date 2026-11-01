@@ -1,19 +1,20 @@
-# 0002. Clasificación del área
+# 0002. Clasificación de subdominios y contextos
 
 ## Contexto
 
-Necesitamos clasificar el tipo de dominio y su complejidad para orientar la estrategia de desarrollo.
+La clasificación orienta la estrategia de desarrollo, pero no sustituye la definición de límites de contexto. El mapa de Nodo conserva ocho subdominios y sus categorías estratégicas.
 
 ## Decisión
 
-Clasificar el área como un dominio de negocio con dos subdominios principales: facturación y cobros, junto con servicios de soporte.
+La solución implementa dos *Bounded Contexts*, ambos *Generic*:
 
-## Categorías
+- **Facturación y Cobros**: liquidación, obligaciones, conciliación y aplicación de pagos, excesos, devoluciones y emisión de facturas.
+- **Control de Acceso**: evaluación del ingreso, habilitación del miembro y coordinación de operaciones confirmadas sobre la huella.
 
-- Dominio principal: Facturación
-- Dominio principal: Cobros
-- Soporte: administración, reporting y auditoría
+Reservas y disponibilidad se clasifica como *Core*. Membresías y planes, Agenda de eventos, Tarifas y precios y Espacios y recursos se clasifican como *Supporting*. Notificaciones es *Generic* transversal. Facturación y Cobros es un solo subdominio *Generic*, no dos subdominios principales.
 
-## Resultado esperado
+## Consecuencias
 
-Establecer base para priorizar las capacidades y organizar equipos por contexto.
+- La organización interna puede separar facturación y cobros por responsabilidades, sin crear una frontera DDD entre ellos.
+- El valor estratégico *Core* del mapa corresponde a Reservas y disponibilidad; no se atribuye a Facturación, Cobros o Control de Acceso.
+- La clasificación y las fronteras se mantienen consistentes entre ADR, Context Map, glosario y documentación del código.

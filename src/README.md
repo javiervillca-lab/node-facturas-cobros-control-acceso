@@ -1,27 +1,25 @@
 # Arquitectura del monolito modular
 
-Este directorio concentra la implementación de los distintos contextos de negocio que forman parte del dominio de Nodo.
+Este directorio contiene la implementación de los dos *Bounded Contexts* del sistema. Ambos se clasifican como *Generic*.
 
-## Contextos principales
+## Contextos delimitados
 
-### Facturación
+### Facturación y Cobros
 
-Define la emisión, validación y mantenimiento de facturas, junto con los conceptos y condiciones económicas asociados.
+Un único contexto financiero que protege las obligaciones, los pagos y su conciliación, los excesos y devoluciones y la emisión de facturas. `facturacion/` y `cobros/` son módulos internos de esta frontera, no contextos independientes. `CuentaPorCobrar` y `Factura` son agregados distintos dentro del mismo contexto.
 
-### Cobros
+### Control de Acceso
 
-Gestiona la recepción, verificación y aplicación de pagos, así como los excesos y devoluciones.
-
-### Control de acceso
-
-Valida permisos, vigencias, autorizaciones y registros operativos de entrada/salida.
+Contexto que protege la elegibilidad del ingreso, la habilitación del miembro y las operaciones sobre el registro de huella. Consulta la situación financiera mediante un contrato traducido y no accede directamente a entidades ni repositorios financieros.
 
 ## Principios de diseño
 
-- cada contexto conserva sus propias reglas y estados,
-- la comunicación entre módulos se realiza mediante eventos y contratos explícitos,
-- la operación financiera no reemplaza a la operación física ni operativa,
-- los servicios transversales se mantienen separados del dominio principal.
+- cada contexto protege su modelo, lenguaje e invariantes,
+- las integraciones entre contextos usan contratos explícitos y no comparten agregados mutables,
+- la separación física de carpetas no define por sí sola una frontera de contexto,
+- los hechos financieros y las actuaciones físicas se registran y confirman por separado.
+
+La estructura de capas concreta depende de cada módulo; la arquitectura objetivo, los agregados y los contratos se describen en la documentación de dominio del proyecto.
 
 ## Estructura esperada
 
@@ -32,4 +30,4 @@ Cada contexto puede organizarse en capas como:
 - `infrastructure/`: persistencia, adaptadores y conectores externos.
 - `interfaces/`: controladores, APIs y listeners.
 
-Esta estructura está alineada con la documentación de dominio y con el entregable completo del proyecto.
+Esta estructura representa una organización posible de responsabilidades y no implica que todas las capas o capacidades estén implementadas.
