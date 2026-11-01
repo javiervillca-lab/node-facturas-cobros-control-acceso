@@ -28,6 +28,6 @@ final readonly class DerechoAcceso
         $dia = (int) $local->format('N');
         $hora = $local->format('H:i');
 
-        return $dia >= 1 && $dia <= 7 && $hora >= '08:00' && $hora < '18:00';
+        return $dia >= 1 && $dia <= 5 && $hora >= '08:00' && $hora < '18:00';
     }
 }

@@ -2,13 +2,13 @@
 
 namespace App\control_acceso\domain;
 
-use App\Entity\Cliente;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'acceso_miembro')]
+#[ORM\UniqueConstraint(name: 'UNIQ_C9EE68A97952B53A', columns: ['miembro_id'])]
 class AccesoMiembro
 {
     public const HABILITADO = 'habilitado';
@@ -24,9 +24,8 @@ class AccesoMiembro
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: Cliente::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private Cliente $miembro;
+    #[ORM\Column(name: 'miembro_id')]
+    private int $miembroId;
 
     #[ORM\Column(length: 30)]
     private string $estado = self::HABILITADO;
@@ -40,16 +39,19 @@ class AccesoMiembro
     #[ORM\OneToMany(targetEntity: OperacionRegistroHuella::class, mappedBy: 'acceso', cascade: ['persist'], orphanRemoval: true)]
     private Collection $operaciones;
 
-    private function __construct(Cliente $miembro)
+    private function __construct(int $miembroId)
     {
-        $this->miembro = $miembro;
+        if ($miembroId <= 0) {
+            throw new \InvalidArgumentException('el miembro debe estar persistido');
+        }
+        $this->miembroId = $miembroId;
         $this->actualizadoEn = new \DateTimeImmutable();
         $this->operaciones = new ArrayCollection();
     }
 
-    public static function registrarInicial(Cliente $miembro): self
+    public static function registrarInicial(int $miembroId): self
     {
-        return new self($miembro);
+        return new self($miembroId);
     }
 
     public function getId(): ?int
@@ -57,19 +59,9 @@ class AccesoMiembro
         return $this->id;
     }
 
-    public function getMiembro(): Cliente
+    public function getMiembroId(): int
     {
-        return $this->miembro;
-    }
-
-    public function getMiembroId(): ?int
-    {
-        return $this->miembro->getId();
-    }
-
-    public function getPlanId(): string
-    {
-        return $this->miembro->getPlan();
+        return $this->miembroId;
     }
 
     public function getEstado(): string

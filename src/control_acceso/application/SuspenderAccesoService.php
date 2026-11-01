@@ -28,9 +28,6 @@ class SuspenderAccesoService
 
         $ahora = new \DateTimeImmutable();
         $pagadorId = $acceso->getMiembroId();
-        if (null === $pagadorId) {
-            throw new \DomainException('el miembro de acceso no está persistido');
-        }
         $situacion = $this->situacionFinanciera->consultar($pagadorId, $ahora);
         $tieneDeuda = $situacion->tieneObligacionBloqueante($ahora);
         $evaluacion = EvaluadorDeIngreso::evaluarSuspension($tieneDeuda);

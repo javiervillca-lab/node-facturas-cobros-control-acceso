@@ -4,7 +4,6 @@ namespace App\control_acceso\infrastructure;
 
 use App\control_acceso\domain\AccesoMiembro;
 use App\control_acceso\domain\AccesoMiembroRepositoryInterface;
-use App\Entity\Cliente;
 use Doctrine\ORM\EntityManagerInterface;
 
 class AccesoMiembroRepository implements AccesoMiembroRepositoryInterface
@@ -18,9 +17,9 @@ class AccesoMiembroRepository implements AccesoMiembroRepositoryInterface
         return $this->em->getRepository(AccesoMiembro::class)->find($id);
     }
 
-    public function obtenerPorMiembro(Cliente $miembro): ?AccesoMiembro
+    public function obtenerPorMiembro(int $miembroId): ?AccesoMiembro
     {
-        return $this->em->getRepository(AccesoMiembro::class)->findOneBy(['miembro' => $miembro]);
+        return $this->em->getRepository(AccesoMiembro::class)->findOneBy(['miembroId' => $miembroId]);
     }
 
     public function guardar(AccesoMiembro $acceso): void

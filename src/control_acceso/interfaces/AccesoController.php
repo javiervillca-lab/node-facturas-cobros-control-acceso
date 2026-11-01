@@ -3,8 +3,10 @@
 namespace App\control_acceso\interfaces;
 
 use App\control_acceso\application\EvaluarIngresoService;
+use App\control_acceso\application\PerfilMiembroPortInterface;
 use App\control_acceso\application\RestablecerAccesoService;
 use App\control_acceso\application\SuspenderAccesoService;
+use App\control_acceso\domain\AccesoMiembro;
 use App\control_acceso\domain\AccesoMiembroRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,23 +16,35 @@ use Symfony\Component\Routing\Attribute\Route;
 class AccesoController extends AbstractController
 {
     #[Route('/accesos', name: 'acceso_index', methods: ['GET'])]
-    public function index(AccesoMiembroRepositoryInterface $accesos): Response
+    public function index(AccesoMiembroRepositoryInterface $accesos, PerfilMiembroPortInterface $perfiles): Response
     {
+        $listaAccesos = $accesos->todos();
+        $miembros = $perfiles->consultar(array_map(
+            static fn (AccesoMiembro $acceso): int => $acceso->getMiembroId(),
+            $listaAccesos,
+        ));
+
         return $this->render('acceso/index.html.twig', [
-            'accesos' => $accesos->todos(),
+            'accesos' => $listaAccesos,
+            'miembros' => $miembros,
         ]);
     }
 
     #[Route('/accesos/{id}', name: 'acceso_show', methods: ['GET'])]
-    public function show(int $id, AccesoMiembroRepositoryInterface $accesos): Response
+    public function show(int $id, AccesoMiembroRepositoryInterface $accesos, PerfilMiembroPortInterface $perfiles): Response
     {
         $acceso = $accesos->obtener($id);
         if (null === $acceso) {
             throw $this->createNotFoundException('acceso no encontrado');
         }
+        $miembro = $perfiles->consultar([$acceso->getMiembroId()])[$acceso->getMiembroId()] ?? null;
+        if (null === $miembro) {
+            throw $this->createNotFoundException('perfil del miembro no encontrado');
+        }
 
         return $this->render('acceso/show.html.twig', [
             'acceso' => $acceso,
+            'miembro' => $miembro,
         ]);
     }
 

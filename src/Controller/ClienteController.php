@@ -39,7 +39,11 @@ class ClienteController extends AbstractController
             $em->persist($cliente);
             $em->flush();
 
-            $accesos->guardar(AccesoMiembro::registrarInicial($cliente));
+            $miembroId = $cliente->getId();
+            if (null === $miembroId) {
+                throw new \LogicException('el cliente debe persistirse antes de habilitar su acceso');
+            }
+            $accesos->guardar(AccesoMiembro::registrarInicial($miembroId));
 
             $this->addFlash('success', 'cliente registrado, ya tiene acceso habilitado');
 

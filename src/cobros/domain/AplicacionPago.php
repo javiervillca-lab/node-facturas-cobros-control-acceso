@@ -5,7 +5,8 @@ namespace App\cobros\domain;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'cobros_aplicacion_pago', uniqueConstraints: [new ORM\UniqueConstraint(name: 'uniq_pago_proveedor_referencia', columns: ['proveedor', 'referencia'])])]
+#[ORM\Table(name: 'cobros_aplicacion_pago')]
+#[ORM\UniqueConstraint(name: 'uniq_pago_proveedor_referencia', columns: ['proveedor', 'referencia'])]
 class AplicacionPago
 {
     #[ORM\Id]

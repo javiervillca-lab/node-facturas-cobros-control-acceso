@@ -25,12 +25,9 @@ class RestablecerAccesoService
 
         $ahora = new \DateTimeImmutable();
         $miembroId = $acceso->getMiembroId();
-        if (null === $miembroId) {
-            throw new \DomainException('el miembro de acceso no está persistido');
-        }
         $situacion = $this->situacionFinanciera->consultar($miembroId, $ahora);
         $tieneDeuda = $situacion->tieneObligacionBloqueante($ahora);
-        $derecho = $this->derechos->consultar($miembroId, $acceso->getPlanId(), $ahora);
+        $derecho = $this->derechos->consultar($miembroId, $ahora);
 
         $evaluacion = EvaluadorDeIngreso::evaluarRestablecimiento($tieneDeuda || !$derecho->vigente);
 

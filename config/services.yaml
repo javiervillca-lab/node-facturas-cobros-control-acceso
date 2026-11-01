@@ -24,6 +24,7 @@ services:
     App\cobros\domain\CuentaPorCobrarRepositoryInterface: '@App\cobros\infrastructure\CuentaPorCobrarRepository'
     App\facturacion\domain\FacturaRepositoryInterface: '@App\facturacion\infrastructure\FacturaRepository'
     App\control_acceso\domain\AccesoMiembroRepositoryInterface: '@App\control_acceso\infrastructure\AccesoMiembroRepository'
+    App\control_acceso\application\PerfilMiembroPortInterface: '@App\control_acceso\infrastructure\PerfilMiembroAdapter'
     App\control_acceso\domain\SituacionFinancieraPortInterface: '@App\control_acceso\infrastructure\SituacionFinancieraAdapter'
     App\control_acceso\domain\AvisoPrevioRepositoryInterface: '@App\control_acceso\infrastructure\AvisoPrevioRepository'
     App\cobros\application\VerificarPagoPortInterface: '@App\cobros\infrastructure\SimulatedPaymentVerificationAdapter'

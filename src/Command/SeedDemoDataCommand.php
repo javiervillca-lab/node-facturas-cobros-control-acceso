@@ -38,7 +38,11 @@ class SeedDemoDataCommand extends Command
         $this->em->flush();
 
         foreach ([$maria, $jorge, $equipo] as $cliente) {
-            $this->accesos->guardar(AccesoMiembro::registrarInicial($cliente));
+            $miembroId = $cliente->getId();
+            if (null === $miembroId) {
+                throw new \LogicException('el cliente debe persistirse antes de habilitar su acceso');
+            }
+            $this->accesos->guardar(AccesoMiembro::registrarInicial($miembroId));
         }
 
         $cuentaMaria = $this->liquidarCuenta->ejecutar($maria, [

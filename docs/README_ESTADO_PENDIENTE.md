@@ -8,9 +8,9 @@ El sistema se delimita en dos *Bounded Contexts*, ambos *Generic*: Facturación 
 
 El repositorio contiene un prototipo con implementación parcial y documentación de diseño. Se añadieron puertos y adaptadores simulados para verificación de pagos, devoluciones, emisión y envío de facturas, avisos previos, derechos de acceso y operaciones de huella. Los adaptadores simulados se identifican en sus resultados y se deshabilitan en producción; no sustituyen las integraciones reales.
 
-También se endurecieron los cálculos monetarios con centavos enteros, la idempotencia de pagos, el plazo de aviso previo a la suspensión y la evaluación de vigencia y horario para el ingreso. Hay pruebas unitarias iniciales para estas reglas, pero todavía no se han ejecutado.
+También se endurecieron los cálculos monetarios con centavos enteros, la idempotencia de pagos, el plazo de aviso previo a la suspensión y la evaluación de vigencia y horario para el ingreso. Las pruebas unitarias y de integración actuales se ejecutan correctamente: cubren pagos repetidos y referencias globales, devoluciones, emisión/envío simulados, la consulta de perfil por el puerto de Control de Acceso y el ciclo completo de aviso, suspensión, regularización y restablecimiento.
 
-La estructura física no demuestra por sí sola el cumplimiento completo de DDD. Persisten relaciones Doctrine directas entre algunos modelos de módulos distintos, y la autenticación y autorización de operadores todavía no están implementadas.
+Control de Acceso conserva el identificador del miembro y consulta el perfil mediante un adaptador; ya no mantiene una relación Doctrine directa con la entidad del módulo de clientes. La estructura física no demuestra por sí sola el cumplimiento completo de DDD: Facturación y Cobros todavía mantiene relaciones directas de persistencia entre sus agregados y la autenticación y autorización de operadores todavía no están implementadas.
 
 ## Documentación relevante
 
@@ -25,9 +25,8 @@ La estructura física no demuestra por sí sola el cumplimiento completo de DDD.
 
 ## Pendientes de implementación y validación
 
-- ejecutar las pruebas unitarias y añadir pruebas de integración para persistencia, idempotencia global y flujos de facturación y acceso;
-- validar el contenedor Symfony, los mappings Doctrine y la migración en el motor de base de datos configurado;
+- repetir validación de contenedor, mappings y migraciones en cada cambio de infraestructura;
 - seleccionar e integrar los proveedores reales antes de habilitar operaciones en producción;
 - definir autenticación, roles y autorización para operadores; los valores de autorización recibidos desde formularios no acreditan una identidad;
-- reducir las dependencias de persistencia cruzadas y documentar los contratos de integración entre los dos contextos;
+- continuar reduciendo las dependencias de persistencia cruzadas dentro de Facturación y Cobros y documentar los contratos de integración entre los dos contextos;
 - confirmar los horarios, vigencias y políticas de acceso con la fuente real de derechos.

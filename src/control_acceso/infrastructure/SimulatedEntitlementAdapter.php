@@ -11,7 +11,7 @@ final class SimulatedEntitlementAdapter implements DerechoAccesoPortInterface
     {
     }
 
-    public function consultar(int $miembroId, string $planId, \DateTimeImmutable $ahora): DerechoAcceso
+    public function consultar(int $miembroId, \DateTimeImmutable $ahora): DerechoAcceso
     {
         if ('prod' === $this->environment) {
             throw new \RuntimeException('los derechos de acceso simulados están deshabilitados en producción; configure un proveedor de derechos');
@@ -20,9 +20,6 @@ final class SimulatedEntitlementAdapter implements DerechoAccesoPortInterface
         if ($miembroId <= 0) {
             throw new \LogicException('el derecho requiere un miembro persistido');
         }
-        $plan = strtolower(trim($planId));
-        $horario = in_array($plan, ['continuo', '24/7'], true) ? 'continuo' : 'normal';
-
-        return new DerechoAcceso('' !== $plan, null, $horario, true);
+        return new DerechoAcceso(true, null, 'normal', true);
     }
 }

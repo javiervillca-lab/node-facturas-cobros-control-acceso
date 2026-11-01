@@ -49,7 +49,7 @@ Las integraciones disponibles en este prototipo son simuladores de desarrollo pa
 
 ## Próximos pasos
 
-1. Ejecutar las pruebas de dominio y validar contenedor, mappings y migraciones en un entorno con PHP y la base de datos configurados.
+1. Validar las políticas de acceso contra la fuente real de derechos cuando se defina.
 2. Definir los proveedores reales de pagos, emisión fiscal, notificaciones, derechos de acceso y huella; sustituir los simuladores antes de desplegar producción.
 3. Definir autenticación y roles operativos; actualmente las rutas no derivan las aprobaciones de una identidad autenticada.
-4. Completar la separación de modelos entre contextos: algunos agregados aún conservan relaciones Doctrine directas con entidades de otros módulos.
+4. Continuar reduciendo relaciones de persistencia cruzadas en los agregados financieros y formalizar sus contratos.

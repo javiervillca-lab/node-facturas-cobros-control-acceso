@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Acceso de {{ acceso.miembro.nombre }}{% endblock %}
+{% block title %}Acceso de {{ miembro.nombre }}{% endblock %}
 
 {% block body %}
-    <h1>{{ acceso.miembro.nombre }} <span class="badge badge-{{ acceso.estado }}">{{ acceso.estado }}</span></h1>
+    <h1>{{ miembro.nombre }} <span class="badge badge-{{ acceso.estado }}">{{ acceso.estado }}</span></h1>
 
     <div class="detalle">
         <dl>
             <dt>Observacion</dt><dd>{{ acceso.observacion }}</dd>
-            <dt>Plan</dt><dd>{{ acceso.miembro.plan }}</dd>
+            <dt>Plan</dt><dd>{{ miembro.plan }}</dd>
         </dl>
     </div>
 
