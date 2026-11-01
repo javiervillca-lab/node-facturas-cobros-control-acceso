@@ -17,16 +17,20 @@ class EvaluadorDeIngreso
         return $tieneDeudaVencidaBloqueante ? self::DESFAVORABLE : self::FAVORABLE;
     }
 
-    public static function evaluarIngreso(AccesoMiembro $acceso, bool $tieneDeudaVencidaBloqueante): array
+    public static function evaluarIngreso(AccesoMiembro $acceso, bool $tieneDeudaVencidaBloqueante, DerechoAcceso $derecho, \DateTimeImmutable $ahora): array
     {
         if ($acceso->getEstado() !== AccesoMiembro::HABILITADO) {
             return ['permitido' => false, 'motivo' => 'el acceso no esta habilitado'];
         }
 
-        if ($tieneDeudaVencidaBloqueante) {
-            return ['permitido' => false, 'motivo' => 'existe una deuda vencida bloqueante'];
+        if (!$derecho->permiteIngreso($ahora)) {
+            return ['permitido' => false, 'motivo' => 'el derecho no está vigente o el ingreso está fuera de horario', 'simulada' => $derecho->simulado];
         }
 
-        return ['permitido' => true, 'motivo' => 'derecho vigente y situacion economica regularizada'];
+        if ($tieneDeudaVencidaBloqueante) {
+            return ['permitido' => false, 'motivo' => 'existe una deuda vencida bloqueante', 'simulada' => $derecho->simulado];
+        }
+
+        return ['permitido' => true, 'motivo' => 'derecho vigente, horario permitido y situación económica regularizada', 'simulada' => $derecho->simulado];
     }
 }

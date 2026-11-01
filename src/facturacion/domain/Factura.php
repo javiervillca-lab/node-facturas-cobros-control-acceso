@@ -3,6 +3,7 @@
 namespace App\facturacion\domain;
 
 use App\cobros\domain\CuentaPorCobrar;
+use App\cobros\domain\Dinero;
 use App\Entity\Cliente;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -47,6 +48,15 @@ class Factura
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $enviadaEn = null;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $constanciaEnvio = null;
+
+    #[ORM\Column]
+    private bool $emisionSimulada = false;
+
+    #[ORM\Column]
+    private bool $envioSimulado = false;
 
     #[ORM\Column]
     private \DateTimeImmutable $creadaEn;
@@ -101,9 +111,14 @@ class Factura
         return $this->cliente;
     }
 
-    public function getTotal(): float
+    public function getTotal(): string
     {
-        return (float) $this->total;
+        return $this->total;
+    }
+
+    public function getMoneda(): string
+    {
+        return $this->moneda;
     }
 
     public function getEstado(): string
@@ -126,29 +141,62 @@ class Factura
         return $this->enviadaEn;
     }
 
+    public function getConstanciaEnvio(): ?string
+    {
+        return $this->constanciaEnvio;
+    }
+
+    public function esEmisionSimulada(): bool
+    {
+        return $this->emisionSimulada;
+    }
+
+    public function esEnvioSimulado(): bool
+    {
+        return $this->envioSimulado;
+    }
+
     public function getLineas(): Collection
     {
         return $this->lineas;
     }
 
-    public function confirmarEmision(string $referenciaFiscal, \DateTimeImmutable $ahora): void
+    public function confirmarEmision(ResultadoEmisionFiscal $resultado, \DateTimeImmutable $ahora): void
     {
+        if ($resultado->moneda !== $this->moneda || Dinero::aCentavos($resultado->total) !== Dinero::aCentavos($this->total)) {
+            throw new \DomainException('el resultado fiscal no coincide con el total y moneda de la factura');
+        }
+        if ($this->estado === self::EMITIDA || $this->estado === self::ENVIADA) {
+            if ($this->referenciaFiscal === $resultado->referenciaFiscal) {
+                return;
+            }
+            throw new \DomainException('la factura ya fue emitida con otra referencia fiscal');
+        }
         if ($this->estado !== self::PENDIENTE_DE_EMISION) {
-            return;
+            throw new \DomainException('la factura no está disponible para emisión');
         }
 
-        $this->referenciaFiscal = $referenciaFiscal;
+        $this->referenciaFiscal = $resultado->referenciaFiscal;
+        $this->emisionSimulada = $resultado->simulada;
         $this->estado = self::EMITIDA;
         $this->emitidaEn = $ahora;
     }
 
-    public function confirmarEnvio(\DateTimeImmutable $ahora): void
+    public function confirmarEnvio(ResultadoEnvioFactura $resultado, \DateTimeImmutable $ahora): void
     {
+        if ($this->estado === self::ENVIADA) {
+            if ($this->constanciaEnvio === $resultado->constancia) {
+                return;
+            }
+            throw new \DomainException('la factura ya fue enviada con otra constancia');
+        }
         if ($this->estado !== self::EMITIDA) {
             throw new \DomainException('solo una factura emitida puede marcarse como enviada');
         }
 
         $this->estado = self::ENVIADA;
         $this->enviadaEn = $ahora;
+        $this->constanciaEnvio = $resultado->constancia;
+        $this->envioSimulado = $resultado->simulado;
     }
 }

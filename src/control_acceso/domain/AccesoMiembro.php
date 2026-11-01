@@ -62,6 +62,16 @@ class AccesoMiembro
         return $this->miembro;
     }
 
+    public function getMiembroId(): ?int
+    {
+        return $this->miembro->getId();
+    }
+
+    public function getPlanId(): string
+    {
+        return $this->miembro->getPlan();
+    }
+
     public function getEstado(): string
     {
         return $this->estado;
@@ -115,7 +125,7 @@ class AccesoMiembro
         return $operacion;
     }
 
-    public function confirmarSuspension(int $operacionId): void
+    public function confirmarSuspension(int $operacionId, EvidenciaRegistroHuella $evidencia): void
     {
         if ($this->estado !== self::SUSPENSION_PENDIENTE) {
             throw new \DomainException('no hay una suspension pendiente que confirmar');
@@ -126,7 +136,7 @@ class AccesoMiembro
             throw new \DomainException('la operacion no corresponde a esta suspension');
         }
 
-        $operacion->confirmar(new \DateTimeImmutable());
+        $operacion->confirmar($evidencia, new \DateTimeImmutable());
         $this->observacion = self::AUSENTE;
         $this->estado = self::SUSPENDIDO;
         $this->actualizadoEn = new \DateTimeImmutable();
@@ -148,7 +158,7 @@ class AccesoMiembro
         return $operacion;
     }
 
-    public function confirmarRestablecimiento(int $operacionId): void
+    public function confirmarRestablecimiento(int $operacionId, EvidenciaRegistroHuella $evidencia): void
     {
         if ($this->estado !== self::RESTABLECIMIENTO_PENDIENTE) {
             throw new \DomainException('no hay un restablecimiento pendiente que confirmar');
@@ -159,7 +169,7 @@ class AccesoMiembro
             throw new \DomainException('la operacion no corresponde a este restablecimiento');
         }
 
-        $operacion->confirmar(new \DateTimeImmutable());
+        $operacion->confirmar($evidencia, new \DateTimeImmutable());
         $this->observacion = self::PRESENTE;
         $this->estado = self::HABILITADO;
         $this->actualizadoEn = new \DateTimeImmutable();

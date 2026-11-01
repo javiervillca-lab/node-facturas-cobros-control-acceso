@@ -3,7 +3,6 @@
 namespace App\cobros\infrastructure;
 
 use App\cobros\domain\CuentaPorCobrar;
-use App\Entity\Cliente;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -16,22 +15,31 @@ class SituacionFinancieraQuery
     {
     }
 
-    public function tieneDeudaVencidaBloqueante(Cliente $cliente, \DateTimeImmutable $ahora): bool
+    public function obligacionesVencidas(int $pagadorId, \DateTimeImmutable $ahora): array
     {
-        $limite = $ahora->modify('-5 days');
+        $cuentas = $this->em->createQueryBuilder()
+            ->select('cuenta')
+            ->from(CuentaPorCobrar::class, 'cuenta')
+            ->where('IDENTITY(cuenta.cliente) = :pagadorId')
+            ->andWhere('cuenta.estado = :estado')
+            ->andWhere('cuenta.vencimiento <= :ahora')
+            ->setParameter('pagadorId', $pagadorId)
+            ->setParameter('estado', CuentaPorCobrar::PENDIENTE)
+            ->setParameter('ahora', $ahora)
+            ->getQuery()
+            ->getResult();
 
-        $cuentas = $this->em->getRepository(CuentaPorCobrar::class)->findBy([
-            'cliente' => $cliente,
-            'estado' => CuentaPorCobrar::PENDIENTE,
-        ]);
-
+        $obligaciones = [];
         foreach ($cuentas as $cuenta) {
             $vencimiento = $cuenta->getVencimiento();
-            if (null !== $vencimiento && $vencimiento <= $limite) {
-                return true;
+            if (null !== $vencimiento && null !== $cuenta->getId()) {
+                $obligaciones[] = [
+                    'id' => $cuenta->getId(),
+                    'vencimiento' => $vencimiento,
+                ];
             }
         }
 
-        return false;
+        return $obligaciones;
     }
 }

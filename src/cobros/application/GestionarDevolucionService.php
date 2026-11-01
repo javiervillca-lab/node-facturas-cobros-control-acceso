@@ -6,8 +6,10 @@ use App\cobros\domain\CuentaPorCobrarRepositoryInterface;
 
 class GestionarDevolucionService
 {
-    public function __construct(private CuentaPorCobrarRepositoryInterface $cuentas)
-    {
+    public function __construct(
+        private CuentaPorCobrarRepositoryInterface $cuentas,
+        private DevolucionPortInterface $devolucionPort,
+    ) {
     }
 
     public function aprobar(int $cuentaId, int $devolucionId, string $autorizadoPor): void
@@ -26,7 +28,7 @@ class GestionarDevolucionService
         $this->cuentas->guardar($cuenta);
     }
 
-    public function confirmar(int $cuentaId, int $devolucionId, string $referenciaSalida): void
+    public function confirmar(int $cuentaId, int $devolucionId): void
     {
         $cuenta = $this->cuentas->obtener($cuentaId);
         if (null === $cuenta) {
@@ -37,8 +39,12 @@ class GestionarDevolucionService
         if (null === $devolucion) {
             throw new \DomainException('la devolucion no existe en esta cuenta');
         }
+        if ($devolucion->getEstado() === \App\cobros\domain\DevolucionExceso::DEVUELTA) {
+            return;
+        }
 
-        $devolucion->confirmar($referenciaSalida);
+        $resultado = $this->devolucionPort->ejecutar($devolucion);
+        $devolucion->confirmar($resultado);
         $this->cuentas->guardar($cuenta);
     }
 }

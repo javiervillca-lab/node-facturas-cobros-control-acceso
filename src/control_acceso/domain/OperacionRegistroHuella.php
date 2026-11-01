@@ -39,6 +39,12 @@ class OperacionRegistroHuella
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $resueltaEn = null;
 
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $evidenciaId = null;
+
+    #[ORM\Column]
+    private bool $simulada = false;
+
     public function __construct(AccesoMiembro $acceso, string $tipo, ?string $motivo = null)
     {
         $this->acceso = $acceso;
@@ -72,14 +78,36 @@ class OperacionRegistroHuella
         return $this->creadaEn;
     }
 
+    public function getEvidenciaId(): ?string
+    {
+        return $this->evidenciaId;
+    }
+
+    public function esSimulada(): bool
+    {
+        return $this->simulada;
+    }
+
     public function esNoTerminal(): bool
     {
         return $this->estado === self::SOLICITADA;
     }
 
-    public function confirmar(\DateTimeImmutable $ahora): void
+    public function confirmar(EvidenciaRegistroHuella $evidencia, \DateTimeImmutable $ahora): void
     {
+        if ($this->estado === self::CONFIRMADA) {
+            if ($this->evidenciaId === $evidencia->id) {
+                return;
+            }
+            throw new \DomainException('la operación ya fue confirmada con otra evidencia');
+        }
+        if ($this->estado !== self::SOLICITADA) {
+            throw new \DomainException('solo se puede confirmar una operación solicitada');
+        }
+
         $this->estado = self::CONFIRMADA;
         $this->resueltaEn = $ahora;
+        $this->evidenciaId = $evidencia->id;
+        $this->simulada = $evidencia->simulada;
     }
 }

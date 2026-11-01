@@ -29,7 +29,7 @@ class LineaFactura
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     private string $neto;
 
-    public function __construct(Factura $factura, string $descripcion, float $cantidad, float $precio, float $neto)
+    public function __construct(Factura $factura, string $descripcion, string $cantidad, string $precio, string $neto)
     {
         $this->factura = $factura;
         $this->descripcion = $descripcion;
@@ -43,18 +43,18 @@ class LineaFactura
         return $this->descripcion;
     }
 
-    public function getCantidad(): float
+    public function getCantidad(): string
     {
-        return (float) $this->cantidad;
+        return $this->cantidad;
     }
 
-    public function getPrecio(): float
+    public function getPrecio(): string
     {
-        return (float) $this->precio;
+        return $this->precio;
     }
 
-    public function getNeto(): float
+    public function getNeto(): string
     {
-        return (float) $this->neto;
+        return $this->neto;
     }
 }

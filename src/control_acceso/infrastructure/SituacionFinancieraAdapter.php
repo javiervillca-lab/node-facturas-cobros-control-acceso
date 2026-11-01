@@ -4,7 +4,7 @@ namespace App\control_acceso\infrastructure;
 
 use App\cobros\infrastructure\SituacionFinancieraQuery;
 use App\control_acceso\domain\SituacionFinancieraPortInterface;
-use App\Entity\Cliente;
+use App\control_acceso\domain\SituacionPago;
 
 /**
  * ACL del lado de Control de Acceso para traducir una consulta financiera al
@@ -16,8 +16,12 @@ class SituacionFinancieraAdapter implements SituacionFinancieraPortInterface
     {
     }
 
-    public function tieneDeudaVencidaBloqueante(Cliente $cliente, \DateTimeImmutable $ahora): bool
+    public function consultar(int $pagadorId, \DateTimeImmutable $ahora): SituacionPago
     {
-        return $this->query->tieneDeudaVencidaBloqueante($cliente, $ahora);
+        if ($pagadorId <= 0) {
+            throw new \LogicException('el pagador debe estar persistido para consultar su situación financiera');
+        }
+
+        return new SituacionPago($pagadorId, $this->query->obligacionesVencidas($pagadorId, $ahora), $ahora);
     }
 }

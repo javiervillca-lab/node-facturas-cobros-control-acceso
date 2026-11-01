@@ -10,6 +10,8 @@ interface CuentaPorCobrarRepositoryInterface
 
     public function guardar(CuentaPorCobrar $cuenta): void;
 
+    public function buscarPagoPorProveedorYReferencia(string $proveedor, string $referencia): ?AplicacionPago;
+
     /**
      * @return CuentaPorCobrar[]
      */

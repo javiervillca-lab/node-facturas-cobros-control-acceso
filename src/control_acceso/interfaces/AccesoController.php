@@ -39,11 +39,19 @@ class AccesoController extends AbstractController
     {
         $this->validarCsrf($request);
 
-        $resultado = $suspenderAcceso->evaluarYSolicitar($id);
-        if ($resultado['solicitada']) {
-            $this->addFlash('success', 'suspension solicitada, falta confirmar el retiro de huella');
-        } else {
-            $this->addFlash('error', $resultado['motivo']);
+        try {
+            $resultado = $suspenderAcceso->evaluarYSolicitar($id);
+            if ($resultado['solicitada']) {
+                $this->addFlash('success', 'suspension solicitada, falta confirmar el retiro de huella');
+            } elseif ($resultado['avisoEnviado'] ?? false) {
+                $this->addFlash('success', $resultado['motivo']);
+            } elseif ($resultado['esperaAviso'] ?? false) {
+                $this->addFlash('info', $resultado['motivo']);
+            } else {
+                $this->addFlash('error', $resultado['motivo']);
+            }
+        } catch (\DomainException|\RuntimeException $e) {
+            $this->addFlash('error', $e->getMessage());
         }
 
         return $this->redirectToRoute('acceso_show', ['id' => $id]);
@@ -56,8 +64,8 @@ class AccesoController extends AbstractController
 
         try {
             $suspenderAcceso->confirmar($id, $operacionId);
-            $this->addFlash('success', 'retiro de huella confirmado, acceso suspendido');
-        } catch (\DomainException $e) {
+            $this->addFlash('success', 'retiro de huella simulado y confirmado; acceso suspendido (SIMULADO)');
+        } catch (\DomainException|\RuntimeException $e) {
             $this->addFlash('error', $e->getMessage());
         }
 
@@ -69,11 +77,15 @@ class AccesoController extends AbstractController
     {
         $this->validarCsrf($request);
 
-        $resultado = $restablecerAcceso->evaluarYSolicitar($id, (string) $request->request->get('autorizadoPor', 'Recepcion'));
-        if ($resultado['solicitada']) {
-            $this->addFlash('success', 'restablecimiento solicitado, falta confirmar el alta de huella');
-        } else {
-            $this->addFlash('error', $resultado['motivo']);
+        try {
+            $resultado = $restablecerAcceso->evaluarYSolicitar($id, (string) $request->request->get('autorizadoPor', 'Recepcion'));
+            if ($resultado['solicitada']) {
+                $this->addFlash('success', 'restablecimiento solicitado, falta confirmar el alta de huella');
+            } else {
+                $this->addFlash('error', $resultado['motivo']);
+            }
+        } catch (\DomainException|\RuntimeException $e) {
+            $this->addFlash('error', $e->getMessage());
         }
 
         return $this->redirectToRoute('acceso_show', ['id' => $id]);
@@ -86,8 +98,8 @@ class AccesoController extends AbstractController
 
         try {
             $restablecerAcceso->confirmar($id, $operacionId);
-            $this->addFlash('success', 'alta de huella confirmada, acceso habilitado');
-        } catch (\DomainException $e) {
+            $this->addFlash('success', 'alta de huella simulada y confirmada; acceso habilitado (SIMULADO)');
+        } catch (\DomainException|\RuntimeException $e) {
             $this->addFlash('error', $e->getMessage());
         }
 
@@ -99,12 +111,17 @@ class AccesoController extends AbstractController
     {
         $this->validarCsrf($request);
 
-        $resultado = $evaluarIngreso->evaluar($id);
-        $this->addFlash($resultado['permitido'] ? 'success' : 'error', sprintf(
-            'ingreso %s: %s',
-            $resultado['permitido'] ? 'permitido' : 'denegado',
-            $resultado['motivo']
-        ));
+        try {
+            $resultado = $evaluarIngreso->evaluar($id);
+            $this->addFlash($resultado['permitido'] ? 'success' : 'error', sprintf(
+                'ingreso %s%s: %s',
+                $resultado['permitido'] ? 'permitido' : 'denegado',
+                $resultado['simulada'] ?? false ? ' (SIMULADO)' : '',
+                $resultado['motivo']
+            ));
+        } catch (\DomainException|\RuntimeException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
 
         return $this->redirectToRoute('acceso_show', ['id' => $id]);
     }

@@ -37,11 +37,14 @@ class DevolucionExceso
     #[ORM\Column(length: 80, nullable: true)]
     private ?string $referenciaSalida = null;
 
-    public function __construct(CuentaPorCobrar $cuenta, AplicacionPago $movimientoOrigen, float $monto)
+    #[ORM\Column]
+    private bool $simulada = false;
+
+    public function __construct(CuentaPorCobrar $cuenta, AplicacionPago $movimientoOrigen, string $monto)
     {
         $this->cuenta = $cuenta;
         $this->movimientoOrigen = $movimientoOrigen;
-        $this->monto = (string) $monto;
+        $this->monto = Dinero::desdeCentavos(Dinero::aCentavos($monto));
     }
 
     public function getId(): ?int
@@ -49,9 +52,9 @@ class DevolucionExceso
         return $this->id;
     }
 
-    public function getMonto(): float
+    public function getMonto(): string
     {
-        return (float) $this->monto;
+        return $this->monto;
     }
 
     public function getEstado(): string
@@ -78,15 +81,24 @@ class DevolucionExceso
         $this->autorizadoPor = $autorizadoPor;
     }
 
-    public function confirmar(string $referenciaSalida): void
+    public function confirmar(ResultadoDevolucion $resultado): void
     {
         if ($this->estado === self::DEVUELTA) {
+            if ($this->referenciaSalida !== $resultado->referencia) {
+                throw new \DomainException('la devolución ya fue confirmada con otra referencia');
+            }
             return;
         }
         if ($this->estado !== self::APROBADA) {
             throw new \DomainException('la devolucion debe estar aprobada antes de confirmarse');
         }
         $this->estado = self::DEVUELTA;
-        $this->referenciaSalida = $referenciaSalida;
+        $this->referenciaSalida = $resultado->referencia;
+        $this->simulada = $resultado->simulada;
+    }
+
+    public function esSimulada(): bool
+    {
+        return $this->simulada;
     }
 }

@@ -11,6 +11,7 @@ class EvaluarIngresoService
     public function __construct(
         private AccesoMiembroRepositoryInterface $accesos,
         private SituacionFinancieraPortInterface $situacionFinanciera,
+        private DerechoAccesoPortInterface $derechos,
     ) {
     }
 
@@ -21,8 +22,15 @@ class EvaluarIngresoService
             throw new \DomainException('el acceso no existe');
         }
 
-        $tieneDeuda = $this->situacionFinanciera->tieneDeudaVencidaBloqueante($acceso->getMiembro(), new \DateTimeImmutable());
+        $ahora = new \DateTimeImmutable();
+        $miembroId = $acceso->getMiembroId();
+        if (null === $miembroId) {
+            throw new \DomainException('el miembro de acceso no está persistido');
+        }
+        $situacion = $this->situacionFinanciera->consultar($miembroId, $ahora);
+        $tieneDeuda = $situacion->tieneObligacionBloqueante($ahora);
+        $derecho = $this->derechos->consultar($miembroId, $acceso->getPlanId(), $ahora);
 
-        return EvaluadorDeIngreso::evaluarIngreso($acceso, $tieneDeuda);
+        return EvaluadorDeIngreso::evaluarIngreso($acceso, $tieneDeuda, $derecho, $ahora);
     }
 }

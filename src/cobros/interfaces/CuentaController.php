@@ -50,9 +50,9 @@ class CuentaController extends AbstractController
                 $conceptos[] = [
                     'tipo' => $tipo,
                     'descripcion' => $descripciones[$i] ?? $tipo,
-                    'cantidad' => $cantidades[$i] ?? 1,
-                    'precio' => $precios[$i] ?? 0,
-                    'descuento' => $descuentos[$i] ?? 0,
+                    'cantidad' => (string) ($cantidades[$i] ?? '1'),
+                    'precio' => (string) ($precios[$i] ?? '0'),
+                    'descuento' => (string) ($descuentos[$i] ?? '0'),
                 ];
             }
 
@@ -67,7 +67,7 @@ class CuentaController extends AbstractController
                 return $this->redirectToRoute('cuenta_new');
             }
 
-            $this->addFlash('success', sprintf('cuenta %s liquidada por %.2f', $cuenta->getCodigo(), $cuenta->getTotal()));
+            $this->addFlash('success', sprintf('cuenta %s liquidada por %s', $cuenta->getCodigo(), $cuenta->getTotal()));
 
             return $this->redirectToRoute('cuenta_show', ['id' => $cuenta->getId()]);
         }
@@ -100,14 +100,14 @@ class CuentaController extends AbstractController
                 $id,
                 (string) $request->request->get('referencia'),
                 (string) $request->request->get('proveedor'),
-                (float) $request->request->get('importe'),
+                (string) $request->request->get('importe'),
             );
-            $mensaje = sprintf('pago aplicado: %.2f', $aplicacion->getImporteAplicado());
-            if ($aplicacion->getExceso() > 0) {
-                $mensaje .= sprintf(', exceso detectado: %.2f', $aplicacion->getExceso());
+            $mensaje = sprintf('PAGO SIMULADO: aplicación de %s', $aplicacion->getImporteAplicado());
+            if (\App\cobros\domain\Dinero::aCentavos($aplicacion->getExceso()) > 0) {
+                $mensaje .= sprintf(', exceso simulado: %s', $aplicacion->getExceso());
             }
             $this->addFlash('success', $mensaje);
-        } catch (\DomainException $e) {
+        } catch (\DomainException|\InvalidArgumentException|\RuntimeException $e) {
             $this->addFlash('error', $e->getMessage());
         }
 
@@ -122,7 +122,7 @@ class CuentaController extends AbstractController
         try {
             $gestionarDevolucion->aprobar($id, $devolucionId, (string) $request->request->get('autorizadoPor'));
             $this->addFlash('success', 'devolucion aprobada por direccion');
-        } catch (\DomainException $e) {
+        } catch (\DomainException|\RuntimeException $e) {
             $this->addFlash('error', $e->getMessage());
         }
 
@@ -135,8 +135,8 @@ class CuentaController extends AbstractController
         $this->validarCsrf($request);
 
         try {
-            $gestionarDevolucion->confirmar($id, $devolucionId, (string) $request->request->get('referenciaSalida'));
-            $this->addFlash('success', 'devolucion confirmada y cerrada');
+            $gestionarDevolucion->confirmar($id, $devolucionId);
+            $this->addFlash('success', 'devolución simulada y confirmada');
         } catch (\DomainException $e) {
             $this->addFlash('error', $e->getMessage());
         }

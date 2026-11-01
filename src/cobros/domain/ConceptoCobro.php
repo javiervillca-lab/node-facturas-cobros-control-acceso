@@ -35,24 +35,27 @@ class ConceptoCobro
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     private string $neto;
 
-    public function __construct(CuentaPorCobrar $cuenta, string $tipo, string $descripcion, float $cantidad, float $precio, float $descuento = 0.0)
+    public function __construct(CuentaPorCobrar $cuenta, string $tipo, string $descripcion, string|int $cantidad, string|int $precio, string|int $descuento = '0')
     {
-        if ($cantidad <= 0 || $precio < 0 || $descuento < 0) {
+        $cantidadCentavos = Dinero::aCentavos($cantidad);
+        $precioCentavos = Dinero::aCentavos($precio);
+        $descuentoCentavos = Dinero::aCentavos($descuento);
+        if ($cantidadCentavos <= 0 || $precioCentavos < 0 || $descuentoCentavos < 0) {
             throw new \InvalidArgumentException('cantidad, precio o descuento invalidos');
         }
 
         $this->cuenta = $cuenta;
         $this->tipo = $tipo;
         $this->descripcion = $descripcion;
-        $this->cantidad = (string) $cantidad;
-        $this->precio = (string) $precio;
-        $this->descuento = (string) $descuento;
+        $this->cantidad = Dinero::desdeCentavos($cantidadCentavos);
+        $this->precio = Dinero::desdeCentavos($precioCentavos);
+        $this->descuento = Dinero::desdeCentavos($descuentoCentavos);
 
-        $neto = round($cantidad * $precio - $descuento, 2);
-        if ($neto <= 0) {
+        $netoCentavos = Dinero::aCentavos(Dinero::multiplicar($cantidad, $precio)) - $descuentoCentavos;
+        if ($netoCentavos <= 0) {
             throw new \InvalidArgumentException('el concepto no puede tener un neto cero o negativo');
         }
-        $this->neto = (string) $neto;
+        $this->neto = Dinero::desdeCentavos($netoCentavos);
     }
 
     public function getId(): ?int
@@ -70,23 +73,23 @@ class ConceptoCobro
         return $this->descripcion;
     }
 
-    public function getCantidad(): float
+    public function getCantidad(): string
     {
-        return (float) $this->cantidad;
+        return $this->cantidad;
     }
 
-    public function getPrecio(): float
+    public function getPrecio(): string
     {
-        return (float) $this->precio;
+        return $this->precio;
     }
 
-    public function getDescuento(): float
+    public function getDescuento(): string
     {
-        return (float) $this->descuento;
+        return $this->descuento;
     }
 
-    public function getNeto(): float
+    public function getNeto(): string
     {
-        return (float) $this->neto;
+        return $this->neto;
     }
 }

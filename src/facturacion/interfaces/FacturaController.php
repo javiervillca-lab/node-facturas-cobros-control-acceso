@@ -55,8 +55,12 @@ class FacturaController extends AbstractController
     {
         $this->validarCsrf($request);
 
-        $factura = $emitirFactura->confirmarEmision($id);
-        $this->addFlash('success', sprintf('factura emitida con referencia %s', $factura->getReferenciaFiscal()));
+        try {
+            $factura = $emitirFactura->confirmarEmision($id);
+            $this->addFlash('success', sprintf('factura emitida con referencia %s%s', $factura->getReferenciaFiscal(), $factura->esEmisionSimulada() ? ' (SIMULADA)' : ''));
+        } catch (\DomainException|\RuntimeException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
 
         return $this->redirectToRoute('factura_show', ['id' => $id]);
     }
@@ -67,9 +71,9 @@ class FacturaController extends AbstractController
         $this->validarCsrf($request);
 
         try {
-            $enviarFactura->ejecutar($id);
-            $this->addFlash('success', 'factura marcada como enviada al cliente');
-        } catch (\DomainException $e) {
+            $factura = $enviarFactura->ejecutar($id);
+            $this->addFlash('success', $factura->esEnvioSimulado() ? 'envío de factura simulado; no se notificó a un cliente real' : 'factura enviada con constancia');
+        } catch (\DomainException|\RuntimeException $e) {
             $this->addFlash('error', $e->getMessage());
         }
 

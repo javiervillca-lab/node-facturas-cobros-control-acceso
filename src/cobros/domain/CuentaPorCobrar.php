@@ -72,12 +72,15 @@ class CuentaPorCobrar
     }
 
     /**
-     * @param array<int, array{tipo: string, descripcion: string, cantidad: float, precio: float, descuento?: float}> $conceptosData
+     * @param array<int, array{tipo: string, descripcion: string, cantidad: string|int, precio: string|int, descuento?: string|int}> $conceptosData
      */
     public static function crear(Cliente $cliente, ?string $periodo, string $moneda, array $conceptosData, ?\DateTimeImmutable $vencimiento = null): self
     {
         if (count($conceptosData) === 0) {
             throw new \DomainException('una cuenta no puede crearse sin conceptos');
+        }
+        if (!preg_match('/^[A-Z]{3}$/', $moneda)) {
+            throw new \InvalidArgumentException('la moneda debe utilizar un código ISO de tres letras');
         }
 
         $cuenta = new self($cliente, $periodo, $moneda, $vencimiento);
@@ -88,14 +91,17 @@ class CuentaPorCobrar
                 $cuenta,
                 $dato['tipo'],
                 $dato['descripcion'],
-                (float) $dato['cantidad'],
-                (float) $dato['precio'],
-                (float) ($dato['descuento'] ?? 0)
+                $dato['cantidad'],
+                $dato['precio'],
+                $dato['descuento'] ?? '0'
             );
         }
 
         $cuenta->conceptos = new ArrayCollection($conceptos);
-        $cuenta->total = (string) CalculoDeCobro::totalDe($conceptos);
+        $cuenta->total = CalculoDeCobro::totalDe($conceptos);
+        if (Dinero::aCentavos($cuenta->total) <= 0) {
+            throw new \DomainException('el total de la cuenta debe ser mayor que cero');
+        }
         $cuenta->saldo = $cuenta->total;
 
         return $cuenta;
@@ -121,14 +127,14 @@ class CuentaPorCobrar
         return $this->moneda;
     }
 
-    public function getTotal(): float
+    public function getTotal(): string
     {
-        return (float) $this->total;
+        return $this->total;
     }
 
-    public function getSaldo(): float
+    public function getSaldo(): string
     {
-        return (float) $this->saldo;
+        return $this->saldo;
     }
 
     public function getEstado(): string
@@ -156,10 +162,10 @@ class CuentaPorCobrar
         return $this->devoluciones;
     }
 
-    public function buscarAplicacionPorReferencia(string $referencia): ?AplicacionPago
+    public function buscarAplicacionPorReferencia(string $proveedor, string $referencia): ?AplicacionPago
     {
         foreach ($this->aplicaciones as $aplicacion) {
-            if ($aplicacion->getReferencia() === $referencia) {
+            if ($aplicacion->getProveedor() === $proveedor && $aplicacion->getReferencia() === $referencia) {
                 return $aplicacion;
             }
         }
@@ -178,31 +184,39 @@ class CuentaPorCobrar
         return null;
     }
 
-    public function registrarPagoConfirmado(string $referencia, string $proveedor, float $importeRecibido): AplicacionPago
+    public function registrarPagoVerificado(VerificacionPago $verificacion): AplicacionPago
     {
-        $existente = $this->buscarAplicacionPorReferencia($referencia);
+        if ($verificacion->moneda !== $this->moneda) {
+            throw new \DomainException('la moneda del pago verificado no coincide con la cuenta');
+        }
+        if ($this->cliente->getId() !== $verificacion->pagadorId) {
+            throw new \DomainException('el pagador verificado no coincide con la cuenta');
+        }
+
+        $existente = $this->buscarAplicacionPorReferencia($verificacion->proveedor, $verificacion->referencia);
         if (null !== $existente) {
+            if ($existente->getImporteRecibido() !== $verificacion->importe) {
+                throw new \DomainException('la referencia existente tiene un importe distinto');
+            }
+
             return $existente;
         }
 
-        if ($importeRecibido <= 0) {
-            throw new \DomainException('el importe recibido debe ser mayor a cero');
-        }
+        $saldoCentavos = Dinero::aCentavos($this->saldo);
+        $recibidoCentavos = Dinero::aCentavos($verificacion->importe);
+        $importeAplicado = Dinero::desdeCentavos(min($recibidoCentavos, $saldoCentavos));
+        $exceso = Dinero::desdeCentavos($recibidoCentavos - Dinero::aCentavos($importeAplicado));
 
-        $saldoActual = $this->getSaldo();
-        $importeAplicado = min($importeRecibido, $saldoActual);
-        $exceso = round($importeRecibido - $importeAplicado, 2);
-
-        $aplicacion = new AplicacionPago($this, $referencia, $proveedor, $importeRecibido, $importeAplicado, $exceso);
+        $aplicacion = new AplicacionPago($this, $verificacion, $importeAplicado, $exceso);
         $this->aplicaciones->add($aplicacion);
 
-        $this->saldo = (string) round($saldoActual - $importeAplicado, 2);
-        if ((float) $this->saldo <= 0) {
-            $this->saldo = '0.00';
+        $saldoRestante = $saldoCentavos - Dinero::aCentavos($importeAplicado);
+        $this->saldo = Dinero::desdeCentavos($saldoRestante);
+        if (0 === $saldoRestante) {
             $this->estado = self::SALDADA;
         }
 
-        if ($exceso > 0) {
+        if (Dinero::aCentavos($exceso) > 0) {
             $devolucion = new DevolucionExceso($this, $aplicacion, $exceso);
             $this->devoluciones->add($devolucion);
         }

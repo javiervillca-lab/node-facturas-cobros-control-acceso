@@ -7,13 +7,13 @@ class CalculoDeCobro
     /**
      * @param ConceptoCobro[] $conceptos
      */
-    public static function totalDe(array $conceptos): float
+    public static function totalDe(array $conceptos): string
     {
-        $total = 0.0;
+        $total = '0.00';
         foreach ($conceptos as $concepto) {
-            $total += $concepto->getNeto();
+            $total = Dinero::sumar($total, $concepto->getNeto());
         }
 
-        return round($total, 2);
+        return $total;
     }
 }

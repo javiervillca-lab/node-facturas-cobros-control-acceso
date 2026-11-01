@@ -33,6 +33,8 @@ La estructura física del código describe módulos y adaptadores; no modifica l
 
 El repositorio contiene un prototipo y documentación de diseño. El alcance futuro, las capacidades pendientes y las diferencias entre el objetivo y la implementación actual se detallan en [el estado pendiente](docs/README_ESTADO_PENDIENTE.md). No se debe interpretar el diseño documentado como funcionalidad ya implementada.
 
+Las integraciones disponibles en este prototipo son simuladores de desarrollo para pagos, emisión fiscal, notificaciones y huella. Sus resultados se identifican como simulados y los adaptadores se niegan a operar en producción. No representan pagos reales, documentos fiscales válidos ni actuaciones o avisos efectivamente realizados.
+
 ## Documentación
 
 - [Modelo de dominio y entregable completo](docs/00_ENTREGABLE_COMPLETO.md)
@@ -47,6 +49,7 @@ El repositorio contiene un prototipo y documentación de diseño. El alcance fut
 
 ## Próximos pasos
 
-1. Contrastar la implementación existente con los agregados, invariantes y casos de uso documentados.
-2. Completar los contratos públicos entre Facturación y Cobros y Control de Acceso.
-3. Implementar pruebas de dominio e integración para los invariantes documentados.
+1. Ejecutar las pruebas de dominio y validar contenedor, mappings y migraciones en un entorno con PHP y la base de datos configurados.
+2. Definir los proveedores reales de pagos, emisión fiscal, notificaciones, derechos de acceso y huella; sustituir los simuladores antes de desplegar producción.
+3. Definir autenticación y roles operativos; actualmente las rutas no derivan las aprobaciones de una identidad autenticada.
+4. Completar la separación de modelos entre contextos: algunos agregados aún conservan relaciones Doctrine directas con entidades de otros módulos.

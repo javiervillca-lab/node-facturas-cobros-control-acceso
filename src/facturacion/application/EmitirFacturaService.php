@@ -11,6 +11,7 @@ class EmitirFacturaService
     public function __construct(
         private CuentaPorCobrarRepositoryInterface $cuentas,
         private FacturaRepositoryInterface $facturas,
+        private EmisionFiscalPortInterface $emisionFiscal,
     ) {
     }
 
@@ -38,9 +39,15 @@ class EmitirFacturaService
         if (null === $factura) {
             throw new \DomainException('la factura no existe');
         }
+        if ($factura->getEstado() === Factura::EMITIDA || $factura->getEstado() === Factura::ENVIADA) {
+            return $factura;
+        }
+        if ($factura->getEstado() !== Factura::PENDIENTE_DE_EMISION) {
+            throw new \DomainException('la factura no está disponible para emisión');
+        }
 
-        $referencia = sprintf('SIN-%s-%d', date('Ymd'), $factura->getId());
-        $factura->confirmarEmision($referencia, new \DateTimeImmutable());
+        $resultado = $this->emisionFiscal->emitir($factura);
+        $factura->confirmarEmision($resultado, new \DateTimeImmutable());
         $this->facturas->guardar($factura);
 
         return $factura;

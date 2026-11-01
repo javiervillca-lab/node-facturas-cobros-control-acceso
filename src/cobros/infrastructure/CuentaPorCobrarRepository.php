@@ -24,6 +24,14 @@ class CuentaPorCobrarRepository implements CuentaPorCobrarRepositoryInterface
         $this->em->flush();
     }
 
+    public function buscarPagoPorProveedorYReferencia(string $proveedor, string $referencia): ?\App\cobros\domain\AplicacionPago
+    {
+        return $this->em->getRepository(\App\cobros\domain\AplicacionPago::class)->findOneBy([
+            'proveedor' => $proveedor,
+            'referencia' => $referencia,
+        ]);
+    }
+
     public function todas(): array
     {
         return $this->em->getRepository(CuentaPorCobrar::class)->findBy([], ['id' => 'DESC']);

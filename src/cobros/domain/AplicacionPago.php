@@ -5,7 +5,7 @@ namespace App\cobros\domain;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'cobros_aplicacion_pago')]
+#[ORM\Table(name: 'cobros_aplicacion_pago', uniqueConstraints: [new ORM\UniqueConstraint(name: 'uniq_pago_proveedor_referencia', columns: ['proveedor', 'referencia'])])]
 class AplicacionPago
 {
     #[ORM\Id]
@@ -35,20 +35,33 @@ class AplicacionPago
     #[ORM\Column]
     private \DateTimeImmutable $verificadoEn;
 
-    public function __construct(CuentaPorCobrar $cuenta, string $referencia, string $proveedor, float $importeRecibido, float $importeAplicado, float $exceso)
+    #[ORM\Column(length: 100)]
+    private string $verificacionId;
+
+    #[ORM\Column]
+    private bool $simulada;
+
+    public function __construct(CuentaPorCobrar $cuenta, VerificacionPago $verificacion, string $importeAplicado, string $exceso)
     {
         $this->cuenta = $cuenta;
-        $this->referencia = $referencia;
-        $this->proveedor = $proveedor;
-        $this->importeRecibido = (string) $importeRecibido;
-        $this->importeAplicado = (string) $importeAplicado;
-        $this->exceso = (string) $exceso;
+        $this->referencia = $verificacion->referencia;
+        $this->proveedor = $verificacion->proveedor;
+        $this->importeRecibido = $verificacion->importe;
+        $this->importeAplicado = $importeAplicado;
+        $this->exceso = $exceso;
         $this->verificadoEn = new \DateTimeImmutable();
+        $this->verificacionId = $verificacion->id;
+        $this->simulada = $verificacion->simulada;
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getCuenta(): CuentaPorCobrar
+    {
+        return $this->cuenta;
     }
 
     public function getReferencia(): string
@@ -61,23 +74,33 @@ class AplicacionPago
         return $this->proveedor;
     }
 
-    public function getImporteRecibido(): float
+    public function getImporteRecibido(): string
     {
-        return (float) $this->importeRecibido;
+        return $this->importeRecibido;
     }
 
-    public function getImporteAplicado(): float
+    public function getImporteAplicado(): string
     {
-        return (float) $this->importeAplicado;
+        return $this->importeAplicado;
     }
 
-    public function getExceso(): float
+    public function getExceso(): string
     {
-        return (float) $this->exceso;
+        return $this->exceso;
     }
 
     public function getVerificadoEn(): \DateTimeImmutable
     {
         return $this->verificadoEn;
+    }
+
+    public function getVerificacionId(): string
+    {
+        return $this->verificacionId;
+    }
+
+    public function esSimulada(): bool
+    {
+        return $this->simulada;
     }
 }

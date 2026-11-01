@@ -13,7 +13,7 @@ class LiquidarCuentaService
     }
 
     /**
-     * @param array<int, array{tipo: string, descripcion: string, cantidad: float, precio: float, descuento?: float}> $conceptosData
+     * @param array<int, array{tipo: string, descripcion: string, cantidad: string|int, precio: string|int, descuento?: string|int}> $conceptosData
      */
     public function ejecutar(Cliente $cliente, array $conceptosData, ?string $periodo, ?\DateTimeImmutable $vencimiento): CuentaPorCobrar
     {

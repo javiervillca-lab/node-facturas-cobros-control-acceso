@@ -2,9 +2,7 @@
 
 namespace App\control_acceso\domain;
 
-use App\Entity\Cliente;
-
 interface SituacionFinancieraPortInterface
 {
-    public function tieneDeudaVencidaBloqueante(Cliente $cliente, \DateTimeImmutable $ahora): bool;
+    public function consultar(int $pagadorId, \DateTimeImmutable $ahora): SituacionPago;
 }

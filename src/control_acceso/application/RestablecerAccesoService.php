@@ -11,6 +11,8 @@ class RestablecerAccesoService
     public function __construct(
         private AccesoMiembroRepositoryInterface $accesos,
         private SituacionFinancieraPortInterface $situacionFinanciera,
+        private RegistroHuellaPortInterface $registroHuella,
+        private DerechoAccesoPortInterface $derechos,
     ) {
     }
 
@@ -21,8 +23,16 @@ class RestablecerAccesoService
             throw new \DomainException('el acceso no existe');
         }
 
-        $tieneDeuda = $this->situacionFinanciera->tieneDeudaVencidaBloqueante($acceso->getMiembro(), new \DateTimeImmutable());
-        $evaluacion = EvaluadorDeIngreso::evaluarRestablecimiento($tieneDeuda);
+        $ahora = new \DateTimeImmutable();
+        $miembroId = $acceso->getMiembroId();
+        if (null === $miembroId) {
+            throw new \DomainException('el miembro de acceso no está persistido');
+        }
+        $situacion = $this->situacionFinanciera->consultar($miembroId, $ahora);
+        $tieneDeuda = $situacion->tieneObligacionBloqueante($ahora);
+        $derecho = $this->derechos->consultar($miembroId, $acceso->getPlanId(), $ahora);
+
+        $evaluacion = EvaluadorDeIngreso::evaluarRestablecimiento($tieneDeuda || !$derecho->vigente);
 
         if ($evaluacion !== EvaluadorDeIngreso::FAVORABLE) {
             return ['solicitada' => false, 'motivo' => 'las obligaciones exigibles todavia no estan regularizadas'];
@@ -41,7 +51,17 @@ class RestablecerAccesoService
             throw new \DomainException('el acceso no existe');
         }
 
-        $acceso->confirmarRestablecimiento($operacionId);
+        $operacion = $acceso->buscarOperacion($operacionId);
+        if (null === $operacion) {
+            throw new \DomainException('la operación no existe en este acceso');
+        }
+        if ($operacion->getTipo() !== \App\control_acceso\domain\OperacionRegistroHuella::ALTA
+            || $operacion->getEstado() !== \App\control_acceso\domain\OperacionRegistroHuella::SOLICITADA) {
+            throw new \DomainException('la operación no está disponible para confirmar un restablecimiento');
+        }
+
+        $evidencia = $this->registroHuella->ejecutar($operacion);
+        $acceso->confirmarRestablecimiento($operacionId, $evidencia);
         $this->accesos->guardar($acceso);
     }
 }
