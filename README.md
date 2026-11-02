@@ -46,7 +46,7 @@ docker compose exec node-fac-cob php bin/console app:demo:preparar-acceso
 
 Espera a que `pg_isready` indique que PostgreSQL acepta conexiones antes de migrar. El comando de preparación imprime la cuenta y la ruta del acceso creado; no presupongas que su ID es 1. Abre **[http://localhost:8008](http://localhost:8008)** y consulta Clientes, Cuentas, Facturas y Accesos.
 
-La base `faccob` y sus credenciales de `.env`/Compose son valores del entorno local. Prepara el escenario solo en una base local desechable, sin datos que quieras conservar. El comando reconoce el estado inicial, pero no reinicia una demo que ya avanzó. Consulta [instalación, puertos y solución de problemas](docs/INSTALACION_Y_EJECUCION_DOCKER.md).
+La base `faccob` y sus credenciales de `.env`/Compose son valores del entorno local. Prepara el escenario solo en una base local desechable, sin datos que quieras conservar. El comando reconoce el estado inicial, pero no reinicia un escenario que ya avanzó. Consulta [instalación, puertos y solución de problemas](docs/INSTALACION_Y_EJECUCION_DOCKER.md).
 
 ## Pruebas
 
@@ -90,7 +90,7 @@ src/control_acceso/     Contexto de acceso, contratos y simuladores
 src/Entity/             Cliente y su persistencia
 src/Migrations/         Evolución del esquema Doctrine
 templates/              Interfaz Twig
-tests/                  Dominio, integración y preparación de demo
+tests/                  Dominio, integración y preparación de datos de ejemplo
 docker/                 PHP, PostgreSQL y Nginx
 ```
 
@@ -101,4 +101,4 @@ docker compose stop
 docker compose start
 ```
 
-Estos comandos conservan la base y el escenario. Reiniciar contenedores no reinicia una demo avanzada. Evita `down -v`, que elimina los volúmenes de datos del proyecto.
+Estos comandos conservan la base y el escenario. Reiniciar contenedores no restablece un escenario que ya avanzó. Evita `down -v`, que elimina los volúmenes de datos del proyecto.

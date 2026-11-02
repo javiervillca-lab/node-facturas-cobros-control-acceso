@@ -1,6 +1,6 @@
 # Documentación de Nodo
 
-El [documento principal completo](00_ENTREGABLE_COMPLETO.md) reúne el diseño estratégico y táctico. Es la referencia para nombres, reglas, estados y diagramas. Coincide con la versión local `Nodo_Entrega_Final_Revisada.md` contrastada al actualizar esta documentación.
+El [documento principal completo](00_ENTREGABLE_COMPLETO.md) reúne el diseño estratégico y táctico. Es la referencia para nombres, reglas, estados y diagramas; las consultas temáticas siguientes permiten acceder a cada parte del modelo.
 
 ## Para ejecutar y probar
 
