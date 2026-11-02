@@ -38,6 +38,7 @@ Las integraciones disponibles en este prototipo son simuladores de desarrollo pa
 ## Documentación
 
 - [Modelo de dominio y entregable completo](docs/00_ENTREGABLE_COMPLETO.md)
+- [Instalación y ejecución con Docker](docs/INSTALACION_Y_EJECUCION_DOCKER.md)
 - [Subdominios y contextos delimitados](docs/01-subdominios.md)
 - [Glosario](docs/02-glosario.md)
 - [EventStorming](docs/03-eventstorming.md)
