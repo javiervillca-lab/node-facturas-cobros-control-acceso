@@ -1,87 +1,56 @@
-# Nodo — proyecto de coworking, facturación, cobros y control de acceso
+# Nodo — facturación, cobros y control de acceso
 
-Este repositorio se organiza como un monolito modular siguiendo principios de Domain-Driven Design (DDD). La arquitectura separa responsabilidades por contexto de negocio para evitar mezclar reglas financieras, operativas y de autorización.
+Nodo es un monolito modular para la operación de coworking, espacios, reservas, eventos y servicios asociados. La solución se organiza en **dos Bounded Contexts, Facturación y Cobros y Control de Acceso, ambos Generic**.
 
-## Propósito del sistema
+## Contextos delimitados
 
-Nodo combina la operación de coworking con la gestión de espacios, reservas, eventos y servicios adicionales. El sistema debe soportar:
+### Facturación y Cobros — *Generic*
 
-- membresías y accesos de clientes,
-- alquileres de salas y escritorios,
-- reservas y eventos,
-- facturación por servicios y consumos,
-- conciliación y aplicación de pagos,
-- control de acceso y auditoría operativa.
+Un único contexto financiero que transforma servicios valorizados en obligaciones, verifica y aplica pagos, identifica excesos y gestiona devoluciones y emite facturas. Los directorios `src/facturacion/` y `src/cobros/` son módulos internos de este contexto, no Bounded Contexts separados. `CuentaPorCobrar` y `Factura` son agregados distintos dentro de esta misma frontera.
 
-## Contextos del dominio
+### Control de Acceso — *Generic*
 
-### Facturación
+Evalúa el derecho de ingreso, administra la habilitación del miembro y coordina operaciones confirmadas sobre el registro de huella. Consulta la situación económica del contexto financiero mediante un contrato y una ACL, sin acceder a sus agregados o repositorios.
 
-Responsable de convertir servicios y contratos en obligaciones económicas claras y verificables. Centraliza la emisión de facturas, cálculo de importes, validación de conceptos y mantenimiento del estado documental.
-
-### Cobros
-
-Responsable de registrar, verificar y conciliar pagos. Gestiona la aplicación de abonos, excesos, saldos y devoluciones, sin mezclar estas reglas con la emisión de facturas.
-
-### Control de acceso
-
-Responsable de autorizar o denegar accesos, validar permisos, vigencias y condiciones de ingreso, así como mantener registros de huella y eventos de acceso.
-
-## Estructura del repositorio
+## Estructura relevante
 
 ```text
-node-facturas-cobros-control-acceso/
-├── docs/                          # documentación de dominio y entregables
-├── decisiones/                    # ADRs y decisiones de frontera
-├── src/
-│   ├── facturacion/               # contexto de facturación
-│   ├── cobros/                    # contexto de cobros
-│   ├── control-acceso/            # contexto de control de acceso
-│   ├── Controller/                # controladores Symfony
-│   ├── Entity/                    # entidades persistentes base
-│   ├── Repository/                # repositorios
-│   ├── Migrations/                # migraciones Doctrine
-│   └── Kernel.php                 # arranque de la aplicación
-├── config/
-├── public/
-├── templates/
-├── tests/
-├── composer.json
-├── symfony.lock
-├── Makefile
-├── docker-compose.yml
-├── README.md
-├── docs/00_ENTREGABLE_COMPLETO.md
-└── docs/README_ESTADO_PENDIENTE.md
+docs/                 Documentación del dominio y del diseño objetivo
+decisiones/           Decisiones arquitectónicas (ADR)
+src/
+  facturacion/        Módulo interno de Facturación y Cobros
+  cobros/             Módulo interno de Facturación y Cobros
+  control_acceso/     Contexto Control de Acceso
+  Controller/         Entrada web de la aplicación
+  Entity/             Persistencia de la aplicación
+  Repository/         Repositorios de la aplicación
+  Migrations/         Migraciones Doctrine
 ```
 
-## Reglas de diseño aplicadas
+La estructura física del código describe módulos y adaptadores; no modifica los límites del modelo de dominio. Reservas y disponibilidad se clasifica como *Core* dentro del mapa de subdominios de Nodo, aunque no constituye uno de los contextos implementados como foco de este proyecto.
 
-- separación clara por bounded contexts,
-- lenguaje ubicuo compartido en toda la documentación,
-- reglas de negocio centradas en el dominio,
-- contratos explícitos entre módulos,
-- coordinación mediante eventos y comandos de aplicación,
-- mantenimiento de autonomía entre realidad financiera y realidad operativa.
+## Estado
 
-## Estado actual
+El repositorio contiene un prototipo y documentación de diseño. El alcance futuro, las capacidades pendientes y las diferencias entre el objetivo y la implementación actual se detallan en [el estado pendiente](docs/README_ESTADO_PENDIENTE.md). No se debe interpretar el diseño documentado como funcionalidad ya implementada.
 
-El repositorio se encuentra en una etapa de definición arquitectónica y de dominio. La estructura base y la documentación ya están establecidas; la implementación real de entidades, agregados, servicios y persistencia está pendiente para cada contexto.
+Las integraciones disponibles en este prototipo son simuladores de desarrollo para pagos, emisión fiscal, notificaciones y huella. Sus resultados se identifican como simulados y los adaptadores se niegan a operar en producción. No representan pagos reales, documentos fiscales válidos ni actuaciones o avisos efectivamente realizados.
 
-## Documentación principal
+## Documentación
 
-- `docs/00_ENTREGABLE_COMPLETO.md`: entregable principal con el contexto general del proyecto.
-- `docs/01-subdominios.md`: clasificación de subdominios.
-- `docs/02-glosario.md`: términos y lenguaje ubicuo.
-- `docs/03-eventstorming.md`: eventos, comandos y actores.
-- `docs/04-domain-stories.md`: historias de dominio.
-- `docs/05-context-map.md`: fronteras entre contextos.
-- `docs/06-reglas-invariantes.md`: reglas e invariantes del sistema.
+- [Modelo de dominio y entregable completo](docs/00_ENTREGABLE_COMPLETO.md)
+- [Instalación y ejecución con Docker](docs/INSTALACION_Y_EJECUCION_DOCKER.md)
+- [Subdominios y contextos delimitados](docs/01-subdominios.md)
+- [Glosario](docs/02-glosario.md)
+- [EventStorming](docs/03-eventstorming.md)
+- [Historias de dominio](docs/04-domain-stories.md)
+- [Context Map](docs/05-context-map.md)
+- [Reglas e invariantes](docs/06-reglas-invariantes.md)
+- [Estado y pendientes](docs/README_ESTADO_PENDIENTE.md)
+- [Especificación técnica futura](docs/ESPECIFICACION_FUTURA_PROTOTIPO_Y_PRUEBAS.md)
 
-## Siguientes pasos recomendados
+## Próximos pasos
 
-1. definir agregados, entidades y value objects por contexto,
-2. formalizar repositorios y puertos de infraestructura,
-3. establecer casos de uso de aplicación,
-4. crear contratos de integración entre facturación, cobros y acceso,
-5. preparar pruebas de dominio e integración sobre los invariantes clave.
+1. Validar las políticas de acceso contra la fuente real de derechos cuando se defina.
+2. Definir los proveedores reales de pagos, emisión fiscal, notificaciones, derechos de acceso y huella; sustituir los simuladores antes de desplegar producción.
+3. Definir autenticación y roles operativos; actualmente las rutas no derivan las aprobaciones de una identidad autenticada.
+4. Continuar reduciendo relaciones de persistencia cruzadas en los agregados financieros y formalizar sus contratos.

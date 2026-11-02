@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block body %}
+    <h1>Clientes</h1>
+    <p><a class="boton" href="{{ path('cliente_new') }}">Nuevo cliente</a></p>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Plan</th>
+                <th>Registrado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.id }}</td>
+                    <td>{{ cliente.nombre }}</td>
+                    <td>{{ cliente.email }}</td>
+                    <td>{{ cliente.plan }}</td>
+                    <td>{{ cliente.creadoEn|date('d/m/Y') }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5">todavia no hay clientes registrados</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

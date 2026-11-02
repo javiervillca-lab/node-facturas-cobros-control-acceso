@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accesos{% endblock %}
+
+{% block body %}
+    <h1>Control de acceso</h1>
+    <table>
+        <thead>
+            <tr><th>Miembro</th><th>Estado</th><th>Observacion</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for acceso in accesos %}
+                <tr>
+                    <td>{{ miembros[acceso.miembroId].nombre ?? 'Miembro no disponible' }}</td>
+                    <td><span class="badge badge-{{ acceso.estado }}">{{ acceso.estado }}</span></td>
+                    <td>{{ acceso.observacion }}</td>
+                    <td><a href="{{ path('acceso_show', { id: acceso.id }) }}">ver</a></td>
+                </tr>
+            {% else %}
+                <tr><td colspan="4">todavia no hay miembros registrados</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

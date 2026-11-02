@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nodo{% endblock %}
+
+{% block body %}
+    <h1>Resumen</h1>
+    <div class="cards">
+        <div class="card">
+            <div class="numero">{{ totalClientes }}</div>
+            <div class="etiqueta">clientes registrados</div>
+        </div>
+        <div class="card">
+            <div class="numero">{{ cuentasPendientes }}</div>
+            <div class="etiqueta">cuentas pendientes</div>
+        </div>
+        <div class="card">
+            <div class="numero">{{ cuentasSaldadas }}</div>
+            <div class="etiqueta">cuentas saldadas</div>
+        </div>
+        <div class="card">
+            <div class="numero">{{ facturasEmitidas }}</div>
+            <div class="etiqueta">facturas emitidas</div>
+        </div>
+        <div class="card">
+            <div class="numero">{{ accesosSuspendidos }} / {{ totalAccesos }}</div>
+            <div class="etiqueta">accesos suspendidos</div>
+        </div>
+    </div>
+
+    <p>
+        <a class="boton" href="{{ path('cliente_new') }}">Nuevo cliente</a>
+        <a class="boton secundario" href="{{ path('cuenta_new') }}">Liquidar cuenta</a>
+    </p>
+{% endblock %}

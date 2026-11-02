@@ -21,3 +21,37 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\cobros\domain\CuentaPorCobrarRepositoryInterface: '@App\cobros\infrastructure\CuentaPorCobrarRepository'
+    App\facturacion\domain\FacturaRepositoryInterface: '@App\facturacion\infrastructure\FacturaRepository'
+    App\control_acceso\domain\AccesoMiembroRepositoryInterface: '@App\control_acceso\infrastructure\AccesoMiembroRepository'
+    App\control_acceso\application\PerfilMiembroPortInterface: '@App\control_acceso\infrastructure\PerfilMiembroAdapter'
+    App\control_acceso\domain\SituacionFinancieraPortInterface: '@App\control_acceso\infrastructure\SituacionFinancieraAdapter'
+    App\control_acceso\domain\AvisoPrevioRepositoryInterface: '@App\control_acceso\infrastructure\AvisoPrevioRepository'
+    App\cobros\application\VerificarPagoPortInterface: '@App\cobros\infrastructure\SimulatedPaymentVerificationAdapter'
+    App\cobros\application\DevolucionPortInterface: '@App\cobros\infrastructure\SimulatedRefundAdapter'
+    App\cobros\infrastructure\SimulatedRefundAdapter:
+        arguments:
+            $environment: '%kernel.environment%'
+    App\cobros\infrastructure\SimulatedPaymentVerificationAdapter:
+        arguments:
+            $environment: '%kernel.environment%'
+    App\facturacion\application\EmisionFiscalPortInterface: '@App\facturacion\infrastructure\SimulatedFiscalIssuanceAdapter'
+    App\facturacion\infrastructure\SimulatedFiscalIssuanceAdapter:
+        arguments:
+            $environment: '%kernel.environment%'
+    App\facturacion\application\EnvioFacturaPortInterface: '@App\facturacion\infrastructure\SimulatedInvoiceDeliveryAdapter'
+    App\facturacion\infrastructure\SimulatedInvoiceDeliveryAdapter:
+        arguments:
+            $environment: '%kernel.environment%'
+    App\control_acceso\application\RegistroHuellaPortInterface: '@App\control_acceso\infrastructure\SimulatedFingerprintAdapter'
+    App\control_acceso\infrastructure\SimulatedFingerprintAdapter:
+        arguments:
+            $environment: '%kernel.environment%'
+    App\control_acceso\application\NotificacionSuspensionPortInterface: '@App\control_acceso\infrastructure\SimulatedSuspensionNoticeAdapter'
+    App\control_acceso\infrastructure\SimulatedSuspensionNoticeAdapter:
+        arguments:
+            $environment: '%kernel.environment%'
+    App\control_acceso\application\DerechoAccesoPortInterface: '@App\control_acceso\infrastructure\SimulatedEntitlementAdapter'
+    App\control_acceso\infrastructure\SimulatedEntitlementAdapter:
+        arguments:
+            $environment: '%kernel.environment%'

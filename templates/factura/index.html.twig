@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Facturas{% endblock %}
+
+{% block body %}
+    <h1>Facturas</h1>
+    <table>
+        <thead>
+            <tr><th>Codigo</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Referencia fiscal</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for factura in facturas %}
+                <tr>
+                    <td>{{ factura.codigo }}</td>
+                    <td>{{ factura.cliente.nombre }}</td>
+                    <td>{{ factura.total|number_format(2) }}</td>
+                    <td><span class="badge badge-{{ factura.estado }}">{{ factura.estado }}</span></td>
+                    <td>{{ factura.referenciaFiscal ?: '-' }}</td>
+                    <td><a href="{{ path('factura_show', { id: factura.id }) }}">ver</a></td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6">todavia no hay facturas preparadas</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

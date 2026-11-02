@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ factura.codigo }}{% endblock %}
+
+{% block body %}
+    <h1>{{ factura.codigo }} <span class="badge badge-{{ factura.estado }}">{{ factura.estado }}</span></h1>
+
+    <div class="detalle">
+        <dl>
+            <dt>Cliente</dt><dd>{{ factura.cliente.nombre }}</dd>
+            <dt>Cuenta</dt><dd><a href="{{ path('cuenta_show', { id: factura.cuenta.id }) }}">{{ factura.cuenta.codigo }}</a></dd>
+            <dt>Total</dt><dd>{{ factura.total|number_format(2) }}</dd>
+            <dt>Referencia fiscal</dt><dd>{{ factura.referenciaFiscal ?: '-' }}</dd>
+            {% if factura.esEmisionSimulada() %}<dt>Emisión</dt><dd><strong>SIMULADA; no válida como documento fiscal</strong></dd>{% endif %}
+            {% if factura.constanciaEnvio %}<dt>Constancia de envío</dt><dd>{{ factura.constanciaEnvio }}{% if factura.esEnvioSimulado() %} (SIMULADA){% endif %}</dd>{% endif %}
+            <dt>Emitida</dt><dd>{{ factura.emitidaEn ? factura.emitidaEn|date('d/m/Y H:i') : '-' }}</dd>
+            <dt>Enviada</dt><dd>{{ factura.enviadaEn ? factura.enviadaEn|date('d/m/Y H:i') : '-' }}</dd>
+        </dl>
+    </div>
+
+    <h3>Lineas</h3>
+    <table>
+        <thead>
+            <tr><th>Descripcion</th><th>Cantidad</th><th>Precio</th><th>Neto</th></tr>
+        </thead>
+        <tbody>
+            {% for linea in factura.lineas %}
+                <tr>
+                    <td>{{ linea.descripcion }}</td>
+                    <td>{{ linea.cantidad }}</td>
+                    <td>{{ linea.precio|number_format(2) }}</td>
+                    <td>{{ linea.neto|number_format(2) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p>
+        {% if factura.estado == 'pendiente_de_emision' and app.environment != 'prod' %}
+            <form class="inline" method="post" action="{{ path('factura_emitir', { id: factura.id }) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                <button class="boton" type="submit">Simular emisión SIN</button>
+            </form>
+        {% elseif factura.estado == 'emitida' and app.environment != 'prod' %}
+            <form class="inline" method="post" action="{{ path('factura_enviar', { id: factura.id }) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('submit') }}">
+                <button class="boton" type="submit">Simular envío</button>
+            </form>
+        {% endif %}
+    </p>
+{% endblock %}

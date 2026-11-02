@@ -2,33 +2,57 @@
 
 ## Propósito
 
-Definir las fronteras entre contextos de negocio y sus relaciones en un sistema de coworking y eventos.
+Este mapa detalla las fronteras de **Facturación y Cobros** y **Control de Acceso**. Ambos *Bounded Contexts* son *Generic*. Facturación y Cobros conforma un solo contexto y contiene dos agregados principales, `CuentaPorCobrar` y `Factura`.
 
-## Contextos
+## Contextos y responsabilidad
 
-### Facturación
-- Responsable de emitir facturas por membresías, eventos y reservas.
-- Define conceptos, descuentos, impuestos y estados financieros.
+### Facturación y Cobros — *Generic*
 
-### Cobros
-- Responsable de registrar pagos y reconciliar movimientos financieros.
-- Depende de la información emitida por facturación para validar deudas y pagos.
+Propietario de la obligación económica, los conceptos cobrados, movimientos de pago, aplicaciones, excesos, devoluciones y factura. El agregado `CuentaPorCobrar` protege el saldo y los movimientos; el agregado `Factura` protege las líneas cobradas y el ciclo documental. Ambos agregados pertenecen al mismo lenguaje y contexto, aunque mantienen fronteras de consistencia distintas.
 
-### Control de acceso
-- Responsable de autorizar entradas, validar pases y registrar accesos.
-- Se integra con reservas, eventos y membresías para verificar permisos.
+### Control de Acceso — *Generic*
 
-## Relación sugerida
+Propietario de `AccesoMiembro`, la evaluación de elegibilidad y las operaciones de huella. Consulta la situación económica del otro contexto mediante el contrato público y una ACL del lado consumidor. No consulta directamente sus repositorios ni modifica sus agregados.
 
-- `Facturación` -> `Cobros`: intercambio de facturas, importes y estados de pago.
-- `Facturación` -> `Control de acceso`: información de membresía, reserva o evento asociado.
-- `Cobros` -> `Control de acceso`: validación de pagos pendientes o pagos confirmados antes del acceso.
+## Relaciones
 
-## Tipo de integración
+```mermaid
+flowchart LR
+  M["Membresías y planes"] -->|"cuota, pagador y ciclo"| F["Facturación y Cobros"]
+  R["Reservas y disponibilidad"] -->|"consumos y cancelaciones valorizados"| F
+  E["Agenda de eventos"] -->|"depósitos, saldos y extras"| F
+  T["Tarifas y precios"] -->|"precios comprometidos"| F
+  F -->|"situación financiera mediante contrato y ACL"| A["Control de Acceso"]
+  M -->|"derechos, miembros cubiertos y horario"| A
+  R -->|"derecho temporal"| A
+  E -->|"autorización temporal de evento"| A
+  F -->|"avisos de cobro y envío de factura"| N["Notificaciones"]
+  A -->|"avisos de acceso"| N
+  F -->|"emisión fiscal"| X["Servicio tributario"]
+  A -->|"operación adquirida y evidencia"| H["Lector de huella / Recepción"]
+```
 
-- APIs REST o eventos de dominio.
-- Contratos explícitos y eventos de negocio, como `FacturaEmitida`, `PagoRegistrado` o `AccesoAutorizado`.
+| Proveedor | Consumidor | Contrato o dato | Patrón / frontera |
+|---|---|---|---|
+| Membresías, Reservas, Agenda de eventos y Tarifas | Facturación y Cobros | Cargo valorizado, pagador, origen, moneda y precio comprometido | El subdominio origen conserva la autoridad sobre el servicio |
+| Facturación y Cobros | Control de Acceso | Situación financiera relevante, alcance, vencimientos y versiones | Contrato público y ACL; no se comparte `CuentaPorCobrar` |
+| Membresías, Reservas y Agenda de eventos | Control de Acceso | Derecho, sujeto, vigencia, horario, restricciones y versión | El contexto de acceso no recalcula el derecho |
+| Servicio de verificación y registro de abonos | Facturación y Cobros | Transacción y estado de abono verificables | Adaptador; comprobante comunicado no confirma el pago |
+| Servicio tributario | Facturación y Cobros | Referencia fiscal, importe, moneda y resultado | Adaptador; incertidumbre no se trata como emisión confirmada |
+| Notificaciones | Ambos contextos | Solicitud de envío y resultado correlacionado | Contrato de entrega; un fallo no revierte el hecho de dominio |
+| Lector de huella / Recepción | Control de Acceso | Operación adquirida, resultado y evidencia identificada | Solicitud no equivale a efecto confirmado |
 
-## Recomendación
+## Lenguaje y propiedad
 
-Mantener una frontera clara para evitar que el contexto de control de acceso conozca reglas internas de facturación o cobros que no correspondan a su responsabilidad.
+- `CuentaPorCobrar`, `ConceptoCobro`, `AplicacionPago`, `DevolucionExceso`, `Factura` y `LineaFactura` pertenecen al contexto Facturación y Cobros.
+- `Pendiente` y `Saldada` describen una cuenta; `PendienteDeEmision`, `Emitida` y `Enviada` describen una factura. Ambos conjuntos conviven en el mismo contexto, pero no son estados intercambiables.
+- `AccesoMiembro`, `SituacionPago`, `EvaluacionAcceso` y `OperacionRegistroHuella` pertenecen al contexto Control de Acceso.
+- Un importe traducido entre contextos se transporta como dato de contrato, no como una entidad de dominio mutable compartida.
+- `Cliente`, pagador y miembro identifican roles diferentes; cada operación debe aclarar cuál representa.
+
+## Reglas de integración
+
+1. Control de Acceso no importa agregados ni repositorios financieros; consume el contrato público de situación económica.
+2. Los contratos identifican su sujeto, alcance, moneda, instante y versión cuando esos datos afectan la decisión.
+3. La base de datos o el proceso pueden ser compartidos, pero no se presupone una transacción global entre los dos contextos.
+4. Factura y CuentaPorCobrar pertenecen al mismo contexto, pero siguen siendo agregados independientes y conservan sus invariantes propias.

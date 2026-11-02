@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Cuentas{% endblock %}
+
+{% block body %}
+    <h1>Cuentas por cobrar</h1>
+    <p><a class="boton" href="{{ path('cuenta_new') }}">Liquidar cuenta</a></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Saldo</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cuenta in cuentas %}
+                <tr>
+                    <td>{{ cuenta.codigo }}</td>
+                    <td>{{ cuenta.cliente.nombre }}</td>
+                    <td>{{ cuenta.moneda }} {{ cuenta.total|number_format(2) }}</td>
+                    <td>{{ cuenta.moneda }} {{ cuenta.saldo|number_format(2) }}</td>
+                    <td><span class="badge badge-{{ cuenta.estado }}">{{ cuenta.estado }}</span></td>
+                    <td><a href="{{ path('cuenta_show', { id: cuenta.id }) }}">ver</a></td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6">todavia no hay cuentas liquidadas</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

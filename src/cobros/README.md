@@ -1,51 +1,24 @@
-# Contexto: Cobros
+# Módulo interno: Cobros
 
-## Propósito
+Este directorio contiene responsabilidades de cobro dentro del Bounded Context **Facturación y Cobros**, clasificado como *Generic*. No es un contexto delimitado independiente de `src/facturacion/`.
 
-Este contexto gestiona la recepción, verificación y aplicación de los pagos asociados a deudas o facturas. Su objetivo es convertir un movimiento financiero en un registro confiable y consistente con la obligación comercial correspondiente.
+## Responsabilidad
 
-## Responsabilidades
+Registrar y verificar movimientos de pago, aplicarlos a las obligaciones, conservar su trazabilidad y gestionar excesos y devoluciones. El saldo pertenece a `CuentaPorCobrar`; un pago recibido que excede lo pendiente se registra como exceso y no produce un saldo negativo ni se pierde.
 
-- registrar pagos informados por terceros o por procesos internos,
-- verificar la referencia, el movimiento y la identidad del origen,
-- aplicar un pago a la deuda o factura correcta,
-- identificar excesos y separar devoluciones o compensaciones,
-- mantener el estado de la cuenta por cobrar,
-- regularizar discrepancias y evitar doble aplicación.
+## Lenguaje del contexto
 
-## Conceptos clave
+`PagoInformado` representa la comunicación recibida; no confirma que la empresa haya verificado el movimiento. `AplicacionPago` conserva el importe recibido, aplicado y el exceso asociado a la referencia original. `Pendiente` y `Saldada` describen el estado de la cuenta, no el estado documental de `Factura`.
 
-- pago informado,
-- verificación de movimiento,
-- aplicación de pago,
-- exceso,
-- devolución,
-- cuenta por cobrar,
-- saldo pendiente.
+## Límite e integración
 
-## Invariantes principales
+La conciliación y aplicación de pagos pertenecen al mismo contexto que la emisión de facturas, pero `CuentaPorCobrar` y `Factura` son agregados con invariantes propias. La situación financiera se expone a Control de Acceso mediante un contrato público; el contexto consumidor no consulta este módulo directamente.
 
-- todo pago debe corresponder a una factura, servicio o deuda válida,
-- la suma aplicada no puede superar el monto pendiente sin registrar exceso,
-- una aplicación no puede perder la trazabilidad del movimiento original,
-- el exceso y la devolución deben gestionarse como estados explícitos y no como saldos ocultos.
+## Estructura
 
-## Eventos de dominio sugeridos
+- `domain/`: agregados, valores y políticas de acceso.
+- `application/`: evaluación y coordinación de operaciones.
+- `infrastructure/`: persistencia, ACL y adaptadores de dispositivos.
+- `interfaces/`: entradas administrativas y APIs.
 
-- `PagoInformado`
-- `PagoVerificado`
-- `PagoAplicado`
-- `ExcesoDetectado`
-- `DevolucionSolicitada`
-- `DevolucionEjecutada`
-
-## Capas sugeridas
-
-- `domain/`: entidades, value objects, agregados de pago y cuenta por cobrar.
-- `application/`: servicios de conciliación, aplicación y devolución.
-- `infrastructure/`: integraciones bancarias, almacenamiento y notificaciones.
-- `interfaces/`: endpoints de registro de pago y consulta de situación.
-
-## Estado actual
-
-El contexto está formalizado como una frontera de negocio separada y con contratos claros. La implementación funcional deberá completarse con los casos de uso de aplicación y la persistencia del flujo financiero.
+Las reglas, estados y relaciones del dominio se describen en la documentación del proyecto.
