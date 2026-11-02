@@ -1,33 +1,16 @@
-# Arquitectura del monolito modular
+# Mapa de la implementación
 
-Este directorio contiene la implementación de los dos *Bounded Contexts* del sistema. Ambos se clasifican como *Generic*.
+La solución organiza dos contextos y tres raíces; consulta el [documento completo](../docs/00_ENTREGABLE_COMPLETO.md).
 
-## Contextos delimitados
+| Directorio | Contexto | Contenido |
+|---|---|---|
+| [cobros](cobros/README.md) | Facturación y Cobros | CuentaPorCobrar, pagos, excesos y devolución |
+| [facturacion](facturacion/README.md) | Facturación y Cobros | Factura, líneas, emisión y envío |
+| [control_acceso](control_acceso/README.md) | Control de Acceso | AccesoMiembro, derecho, aviso y operación de huella |
+| Entity y Repository | Soporte de la aplicación | Cliente y su persistencia |
+| Command | Entrada por consola | Preparación de escenario y datos de ejemplo |
+| Migrations | Persistencia | Migraciones Doctrine |
 
-### Facturación y Cobros
+Cada módulo usa `domain/`, `application/`, `infrastructure/` e `interfaces/`. Los controladores delegan casos de uso, los servicios consultan puertos y los adaptadores concretan persistencia y simulación. `config/services.yaml` enlaza interfaces e implementaciones.
 
-Un único contexto financiero que protege las obligaciones, los pagos y su conciliación, los excesos y devoluciones y la emisión de facturas. `facturacion/` y `cobros/` son módulos internos de esta frontera, no contextos independientes. `CuentaPorCobrar` y `Factura` son agregados distintos dentro del mismo contexto.
-
-### Control de Acceso
-
-Contexto que protege la elegibilidad del ingreso, la habilitación del miembro y las operaciones sobre el registro de huella. Consulta la situación financiera mediante un contrato traducido y no accede directamente a entidades ni repositorios financieros.
-
-## Principios de diseño
-
-- cada contexto protege su modelo, lenguaje e invariantes,
-- las integraciones entre contextos usan contratos explícitos y no comparten agregados mutables,
-- la separación física de carpetas no define por sí sola una frontera de contexto,
-- los hechos financieros y las actuaciones físicas se registran y confirman por separado.
-
-La estructura de capas concreta depende de cada módulo; la arquitectura objetivo, los agregados y los contratos se describen en la documentación de dominio del proyecto.
-
-## Estructura esperada
-
-Cada contexto puede organizarse en capas como:
-
-- `domain/`: agregados, entidades, value objects, eventos y reglas del negocio.
-- `application/`: casos de uso y servicios de aplicación.
-- `infrastructure/`: persistencia, adaptadores y conectores externos.
-- `interfaces/`: controladores, APIs y listeners.
-
-Esta estructura representa una organización posible de responsabilidades y no implica que todas las capas o capacidades estén implementadas.
+La consulta financiera pública es `cobros/infrastructure/SituacionFinancieraQuery.php`; el adaptador consumidor `control_acceso/infrastructure/SituacionFinancieraAdapter.php` traduce el resultado. Acceso no importa el agregado CuentaPorCobrar para decidir. Las responsabilidades y contratos se detallan en los capítulos 6–10 del documento principal.

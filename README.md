@@ -1,56 +1,104 @@
-# Nodo — facturación, cobros y control de acceso
+# Nodo — Facturación y Cobros y Control de Acceso
 
-Nodo es un monolito modular para la operación de coworking, espacios, reservas, eventos y servicios asociados. La solución se organiza en **dos Bounded Contexts, Facturación y Cobros y Control de Acceso, ambos Generic**.
+Prototipo académico de un coworking desarrollado con Symfony, Doctrine y PostgreSQL. Modela obligaciones, pagos, facturas y el ciclo de suspensión y restablecimiento de acceso mediante integraciones simuladas.
 
-## Contextos delimitados
+**Empieza por el [documento principal de diseño](docs/00_ENTREGABLE_COMPLETO.md).** Allí están el contexto del negocio, los diagramas, las tres raíces, las invariantes I01–I16 y los contratos propuestos. Para ejecutar el proyecto utiliza la [guía de instalación](docs/INSTALACION_Y_EJECUCION_DOCKER.md).
 
-### Facturación y Cobros — *Generic*
+## Qué contiene el modelo
 
-Un único contexto financiero que transforma servicios valorizados en obligaciones, verifica y aplica pagos, identifica excesos y gestiona devoluciones y emite facturas. Los directorios `src/facturacion/` y `src/cobros/` son módulos internos de este contexto, no Bounded Contexts separados. `CuentaPorCobrar` y `Factura` son agregados distintos dentro de esta misma frontera.
+| Bounded Context | Aggregate roots | Responsabilidad |
+|---|---|---|
+| Facturación y Cobros | CuentaPorCobrar y Factura | Obligación, aplicación de pagos, excesos, devolución y documento fiscal |
+| Control de Acceso | AccesoMiembro | Derecho operativo, suspensión, restablecimiento y resultado de huella |
 
-### Control de Acceso — *Generic*
+Son **dos contextos y tres raíces**. `src/cobros` y `src/facturacion` organizan módulos del mismo contexto financiero. Acceso consulta el contrato financiero mediante un adaptador y lo traduce a SituacionPago. Reservas y disponibilidad es el core del negocio; las dos áreas desarrolladas se clasifican como genéricas.
 
-Evalúa el derecho de ingreso, administra la habilitación del miembro y coordina operaciones confirmadas sobre el registro de huella. Consulta la situación económica del contexto financiero mediante un contrato y una ACL, sin acceder a sus agregados o repositorios.
+## Arranque local
 
-## Estructura relevante
+Necesitas Git, Docker y Docker Compose v2. No necesitas instalar PHP, Composer, Node ni Make en el equipo si utilizas Docker. La primera construcción descarga imágenes y dependencias.
 
-```text
-docs/                 Documentación del dominio y del diseño objetivo
-decisiones/           Decisiones arquitectónicas (ADR)
-src/
-  facturacion/        Módulo interno de Facturación y Cobros
-  cobros/             Módulo interno de Facturación y Cobros
-  control_acceso/     Contexto Control de Acceso
-  Controller/         Entrada web de la aplicación
-  Entity/             Persistencia de la aplicación
-  Repository/         Repositorios de la aplicación
-  Migrations/         Migraciones Doctrine
+```bash
+git clone https://github.com/javiervillca-lab/node-facturas-cobros-control-acceso.git
+cd node-facturas-cobros-control-acceso
 ```
 
-La estructura física del código describe módulos y adaptadores; no modifica los límites del modelo de dominio. Reservas y disponibilidad se clasifica como *Core* dentro del mapa de subdominios de Nodo, aunque no constituye uno de los contextos implementados como foco de este proyecto.
+Define el argumento requerido por el Dockerfile. En **PowerShell**:
 
-## Estado
+```powershell
+$env:userid = "1000"
+```
 
-El repositorio contiene un prototipo y documentación de diseño. El alcance futuro, las capacidades pendientes y las diferencias entre el objetivo y la implementación actual se detallan en [el estado pendiente](docs/README_ESTADO_PENDIENTE.md). No se debe interpretar el diseño documentado como funcionalidad ya implementada.
+En **Linux o WSL**, con un usuario normal:
 
-Las integraciones disponibles en este prototipo son simuladores de desarrollo para pagos, emisión fiscal, notificaciones y huella. Sus resultados se identifican como simulados y los adaptadores se niegan a operar en producción. No representan pagos reales, documentos fiscales válidos ni actuaciones o avisos efectivamente realizados.
+```bash
+export userid=$(id -u)
+```
 
-## Documentación
+Después, desde la raíz del proyecto:
 
-- [Modelo de dominio y entregable completo](docs/00_ENTREGABLE_COMPLETO.md)
-- [Instalación y ejecución con Docker](docs/INSTALACION_Y_EJECUCION_DOCKER.md)
-- [Subdominios y contextos delimitados](docs/01-subdominios.md)
-- [Glosario](docs/02-glosario.md)
-- [EventStorming](docs/03-eventstorming.md)
-- [Historias de dominio](docs/04-domain-stories.md)
-- [Context Map](docs/05-context-map.md)
-- [Reglas e invariantes](docs/06-reglas-invariantes.md)
-- [Estado y pendientes](docs/README_ESTADO_PENDIENTE.md)
-- [Especificación técnica futura](docs/ESPECIFICACION_FUTURA_PROTOTIPO_Y_PRUEBAS.md)
+```bash
+docker compose up -d --build
+docker compose exec db pg_isready -U faccob -d faccob
+docker compose exec node-fac-cob composer install --no-interaction
+docker compose exec node-fac-cob php bin/console doctrine:migrations:migrate --no-interaction
+docker compose exec node-fac-cob php bin/console app:demo:preparar-acceso
+```
 
-## Próximos pasos
+Espera a que `pg_isready` indique que PostgreSQL acepta conexiones antes de migrar. El comando de preparación imprime la cuenta y la ruta del acceso creado; no presupongas que su ID es 1. Abre **[http://localhost:8008](http://localhost:8008)** y consulta Clientes, Cuentas, Facturas y Accesos.
 
-1. Validar las políticas de acceso contra la fuente real de derechos cuando se defina.
-2. Definir los proveedores reales de pagos, emisión fiscal, notificaciones, derechos de acceso y huella; sustituir los simuladores antes de desplegar producción.
-3. Definir autenticación y roles operativos; actualmente las rutas no derivan las aprobaciones de una identidad autenticada.
-4. Continuar reduciendo relaciones de persistencia cruzadas en los agregados financieros y formalizar sus contratos.
+La base `faccob` y sus credenciales de `.env`/Compose son valores del entorno local. Prepara el escenario solo en una base local desechable, sin datos que quieras conservar. El comando reconoce el estado inicial, pero no reinicia una demo que ya avanzó. Consulta [instalación, puertos y solución de problemas](docs/INSTALACION_Y_EJECUCION_DOCKER.md).
+
+## Pruebas
+
+Pruebas de dominio, sin crear una base de pruebas:
+
+```bash
+docker compose exec node-fac-cob php bin/phpunit tests/cobros/domain
+docker compose exec node-fac-cob php bin/phpunit tests/control_acceso/domain
+```
+
+Para ejecutar toda la suite prepara antes la base de pruebas, que Doctrine configura con el sufijo `_test`:
+
+```bash
+docker compose exec node-fac-cob php bin/console doctrine:database:create --env=test --if-not-exists
+docker compose exec node-fac-cob php bin/console doctrine:migrations:migrate --env=test --no-interaction
+docker compose exec node-fac-cob php bin/phpunit
+```
+
+La suite incluye pruebas de dinero decimal, pagos repetidos, exceso, factura y ciclo de acceso. Ejecuta las pruebas de integración sobre la conexión de test, no contra datos de uso normal.
+
+## Funcionamiento del prototipo
+
+El prototipo permite comprobar pagos parciales, referencias repetidas, excesos, emisión y envío simulados, y el ciclo de aviso, espera, suspensión, pago y restablecimiento. La prueba integrada adelanta la fecha del aviso para representar las 24 horas; la interfaz no omite ese plazo.
+
+Pagos, devoluciones, emisión fiscal, notificaciones, derechos y huella utilizan simuladores de desarrollo. No equivalen a movimientos bancarios, comprobantes fiscales ni actuaciones reales. El [documento principal](docs/00_ENTREGABLE_COMPLETO.md) reúne las reglas y los contratos del modelo.
+
+## Documentación y estructura
+
+- [Documento principal completo](docs/00_ENTREGABLE_COMPLETO.md).
+- [Índice de documentación y consultas temáticas](docs/README.md).
+- [Instalación y ejecución](docs/INSTALACION_Y_EJECUCION_DOCKER.md).
+- [Mapa de módulos y capas](src/README.md).
+- [Decisión de fronteras](decisiones/0001-por-que-esta-frontera.md) y [clasificación estratégica](decisiones/0002-clasificacion-del-area.md).
+
+```text
+docs/                   Modelo completo, consultas temáticas y guías de ejecución
+decisiones/             Decisiones de frontera y clasificación
+src/cobros/             Módulo financiero de cuentas, pagos y devoluciones
+src/facturacion/        Módulo financiero de factura, emisión y envío
+src/control_acceso/     Contexto de acceso, contratos y simuladores
+src/Entity/             Cliente y su persistencia
+src/Migrations/         Evolución del esquema Doctrine
+templates/              Interfaz Twig
+tests/                  Dominio, integración y preparación de demo
+docker/                 PHP, PostgreSQL y Nginx
+```
+
+## Apagar y volver a iniciar
+
+```bash
+docker compose stop
+docker compose start
+```
+
+Estos comandos conservan la base y el escenario. Reiniciar contenedores no reinicia una demo avanzada. Evita `down -v`, que elimina los volúmenes de datos del proyecto.
